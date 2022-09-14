@@ -12,16 +12,17 @@ Radiko	KEYWORD1
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-setLocation	KEYWORD2
 onPlay	KEYWORD2
-onError	KEYWORD2
 onProgram	KEYWORD2
 onInfo	KEYWORD2
+onError	KEYWORD2
 setSyslog	KEYWORD2
 setAuthorization	KEYWORD2
 setEnableSBR	KEYWORD2
+setLocation	KEYWORD2
 begin		KEYWORD2
 play		KEYWORD2
+getNumOfStations	KEYWORD2
 #######################################
 # Constants (LITERAL1)
 #######################################
