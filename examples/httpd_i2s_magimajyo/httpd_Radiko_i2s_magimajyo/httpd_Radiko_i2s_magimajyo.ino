@@ -23,9 +23,6 @@ static lgfx::LGFX_Sprite sprite; // [640 * 48] Buffer
 static const lgfx::U8g2font font_L = { lgfx_ja3_ayug_20 } ;
 #endif
 
-void MemoryInfo() {
-} // https://lang-ship.com/blog/work/esp32-heap-1/
-
 void setup() {
   Serial.begin(115200);
 //out.SetPinout(26, 25, 22);  // bck, lrc, dout
@@ -172,7 +169,7 @@ void setup() {
   // I2S の音質がよくないときのおまじない
   // 個体差かもしれないけど、原因が分かりません
   // もし音質が悪かったらコメントを外してみてください
-  // radio.charm();
+  radio.charm();
 }
 
 void loop() {
