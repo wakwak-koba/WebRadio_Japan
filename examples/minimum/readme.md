@@ -14,14 +14,11 @@
 - [arduino-libraries/Arduino_JSON](https://github.com/arduino-libraries/Arduino_JSON)
 
 ### ビルド時の注意
-- Jcbasimal のほうは arduino-esp32 v2.0.4 では動きません。v2.0.3／v2.0.3 をお使いください。
 - フラッシュ 4MB で Jcbasimal をビルドする場合は Partition Schema を No OTA もしくは Minimal SPIFFS にしてください。
-- Radiko のほうは arduino-esp32 v2.0.4 でも動作します。
-- arduino-esp32 v2.0.3 では PSRAM 有効にするとビルドが失敗します。v2.0.2 をお使いください。
-- M5Stack Fire で PSRAM 有効にしたとき、arduino-esp32 v2.0.4 で SPI 関係のエラーが出てしまう場合があります。その場合は v2.0.2 をお使いください。  
+- arduino-esp32 v2.0.3 では PSRAM 有効にするとビルドが失敗します。
 
 #### arduino-esp32 の推奨バージョン
-|ライブラリ|PSRAM無効|PSRAM有効・Fire|PSRAM有効・Fire以外|
-|:--------:|:--------------------:|:--------------------:|:--------------------:|
-|Jcbasimul|v2.0.2/v2.0.3|v2.0.2|v2.0.2|
-|Radiko|v2.0.2/v2.0.3/v2.0.4|v2.0.2|v2.0.2/v2.0.4|
+|ライブラリ|PSRAM無効|PSRAM有効|
+|:--------:|:--------------------:|:--------------------:|
+|Jcbasimul|v2.0.2/v2.0.3|v2.0.2/v2.0.5|
+|Radiko|v2.0.2/v2.0.3/v2.0.5|v2.0.2/v2.0.5|
