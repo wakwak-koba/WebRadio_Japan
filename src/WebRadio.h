@@ -192,6 +192,9 @@ class WebRadio {
     
   public:
     virtual bool begin() { return false; }
+    virtual bool play(int idx) {
+      return play(stations[idx < 0 || idx >= stations.size() ? 0 : idx]);
+    }
     virtual bool play(Station * station = nullptr) {
       if(!station)
         station = restoreStation();
