@@ -11,7 +11,7 @@
 #include "LCD_MagimajyoPures.hpp"
 #include "lgfx_ja3_ayug.h"
 
-static AudioOutputI2S out;
+static AudioOutputI2S out(0, AudioOutputI2S::EXTERNAL_I2S, 9);
 static Radiko radio(&out, APP_CPU_NUM);
 static WebServer httpd(80);
 static String stationName;
@@ -165,11 +165,6 @@ void setup() {
 
   httpd.begin();
   radio.play();
-  
-  // I2S の音質がよくないときのおまじない
-  // 個体差かもしれないけど、原因が分かりません
-  // もし音質が悪かったらコメントを外してみてください
-  radio.charm();
 }
 
 void loop() {

@@ -264,69 +264,6 @@ class WebRadio {
         return "";
     }
     
-    virtual void charm() {
-      Serial.printf("===============================================================\n");
-      Serial.printf("Mem Test\n");
-      Serial.printf("===============================================================\n");
-      Serial.printf("esp_get_free_heap_size()                              : %7d\n", esp_get_free_heap_size() );
-      Serial.printf("esp_get_minimum_free_heap_size()                      : %7d\n", esp_get_minimum_free_heap_size() );
-      //xPortGetFreeHeapSize()（データメモリ）ヒープの空きバイト数を返すFreeRTOS関数です。これはを呼び出すのと同じheap_caps_get_free_size(MALLOC_CAP_8BIT)です。
-      Serial.printf("xPortGetFreeHeapSize()                                : %7d\n", xPortGetFreeHeapSize() );
-      //xPortGetMinimumEverFreeHeapSize()また、関連heap_caps_get_minimum_free_size()するものを使用して、ブート以降のヒープの「最低水準点」を追跡できます。
-      Serial.printf("xPortGetMinimumEverFreeHeapSize()                     : %7d\n", xPortGetMinimumEverFreeHeapSize() );
-      //heap_caps_get_free_size() さまざまなメモリ機能の現在の空きメモリを返すためにも使用できます。
-
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_EXEC)              : %7d\n", heap_caps_get_free_size(MALLOC_CAP_EXEC) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_32BIT)             : %7d\n", heap_caps_get_free_size(MALLOC_CAP_32BIT) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_8BIT)              : %7d\n", heap_caps_get_free_size(MALLOC_CAP_8BIT) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_DMA)               : %7d\n", heap_caps_get_free_size(MALLOC_CAP_DMA) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_PID2)              : %7d\n", heap_caps_get_free_size(MALLOC_CAP_PID2) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_PID3)              : %7d\n", heap_caps_get_free_size(MALLOC_CAP_PID3) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_PID4)              : %7d\n", heap_caps_get_free_size(MALLOC_CAP_PID4) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_PID5)              : %7d\n", heap_caps_get_free_size(MALLOC_CAP_PID5) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_PID6)              : %7d\n", heap_caps_get_free_size(MALLOC_CAP_PID6) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_PID7)              : %7d\n", heap_caps_get_free_size(MALLOC_CAP_PID7) );
-
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_SPIRAM)            : %7d\n", heap_caps_get_free_size(MALLOC_CAP_SPIRAM) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_INTERNAL)          : %7d\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_DEFAULT)           : %7d\n", heap_caps_get_free_size(MALLOC_CAP_DEFAULT) );
-      //Serial.printf("heap_caps_get_free_size(MALLOC_CAP_IRAM_8BIT)         : %7d\n", heap_caps_get_free_size(MALLOC_CAP_IRAM_8BIT) );
-      Serial.printf("heap_caps_get_free_size(MALLOC_CAP_INVALID)           : %7d\n", heap_caps_get_free_size(MALLOC_CAP_INVALID) );
-      //heap_caps_get_largest_free_block()ヒープ内の最大の空きブロックを返すために使用できます。これは、現在可能な最大の単一割り当てです。この値を追跡し、合計空きヒープと比較すると、ヒープの断片化を検出できます。
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_EXEC)     : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_EXEC) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_32BIT)    : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_32BIT) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_8BIT)     : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_8BIT) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_DMA)      : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DMA) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_PID2)     : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_PID2) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_PID3)     : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_PID3) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_PID4)     : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_PID4) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_PID5)     : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_PID5) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_PID6)     : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_PID6) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_PID7)     : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_PID7) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM)   : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_DEFAULT)  : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DEFAULT) );
-      //Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_IRAM_8BIT): %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_IRAM_8BIT) );
-      Serial.printf("heap_caps_get_largest_free_block(MALLOC_CAP_INVALID)  : %7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INVALID) );
-      //heap_caps_get_minimum_free_size()指定された機能を持つすべての領域の合計最小空きメモリを取得します。
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_EXEC)      : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_EXEC) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_32BIT)     : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_32BIT) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT)      : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_DMA)       : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_DMA) ); 
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_PID2)      : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_PID2) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_PID3)      : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_PID3) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_PID4)      : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_PID4) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_PID5)      : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_PID5) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_PID6)      : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_PID6) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_PID7)      : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_PID7) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM)    : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL)  : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT)   : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT) );
-      //Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_IRAM_8BIT) : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_IRAM_8BIT) );
-      Serial.printf("heap_caps_get_minimum_free_size(MALLOC_CAP_INVALID)   : %7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_INVALID) );
-      //heap_caps_get_info()multi_heap_info_t上記の関数からの情報に加えて、ヒープ固有の追加データ（割り当て数など）を含む構造体を返します。
-    } // https://lang-ship.com/blog/work/esp32-heap-1/
-    
     std::function<void(const char *station_name, const size_t station_index)> onPlay = nullptr;
     std::function<void(const char *message)> onError = nullptr;
     std::function<void(const char *message)> onInfo = nullptr;
