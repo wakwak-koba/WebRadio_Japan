@@ -1,5 +1,8 @@
 // https://twitter.com/wakwak-koba/
 
+//#define RADIKO_USER "SET YOUR MAIL-ADDRESS"
+//#define RADIKO_PASS "SET YOUR PREMIUM PASS"
+
 #define LGFX_USE_V1
 #include <LovyanGFX.hpp>
 
@@ -58,6 +61,9 @@ void setup() {
   });
   ArduinoOTA.begin();
 
+#if defined( RADIKO_USER ) && defined( RADIKO_PASS )
+  radio.setAuthorization(RADIKO_USER, RADIKO_PASS);
+#endif
   radio.setEnableSBR(true);
   radio.onPlay = [&](const char * station_name, const size_t station_idx) {
     Serial.printf("onPlay:%d %s\n", station_idx, station_name);
