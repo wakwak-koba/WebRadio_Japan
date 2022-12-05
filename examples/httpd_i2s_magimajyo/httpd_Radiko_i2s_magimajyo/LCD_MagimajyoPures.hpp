@@ -18,8 +18,8 @@ public:
       // 8ビットパラレルバスの設定
       cfg.i2s_port = I2S_NUM_1;  // 使用するI2Sポートを選択 (0 or 1) (ESP32のI2S LCDモードを使用します)
       cfg.freq_write = 16000000; // 送信クロック (最大20MHz, 80MHzを整数で割った値に丸められます)
-      cfg.pin_wr = 12;           // WR を接続しているピン番号     to LCD WR(14)
-      cfg.pin_rd = 13;           // RD を接続しているピン番号     to LCD RD(13)
+      cfg.pin_wr = 13;           // WR を接続しているピン番号     to LCD WR(14)
+      cfg.pin_rd = 12;           // RD を接続しているピン番号     to LCD RD(13)
       cfg.pin_rs = 27;           // RS(D/C)を接続しているピン番号 to LCD DC(16)
 /*
       cfg.pin_d0 = 21;           // D0を接続しているピン番号      to LCD D0(4)

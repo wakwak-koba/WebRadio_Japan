@@ -170,7 +170,7 @@ class WebRadio {
 
     virtual void sendSyslog(const char *text) {
       if(syslog_udp_address != nullptr && syslog_udp_port) {
-        WiFiUDP udp;
+        static WiFiUDP udp;
         static uint64_t seq = 0;
         
         udp.beginPacket(syslog_udp_address, syslog_udp_port);

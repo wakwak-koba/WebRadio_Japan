@@ -386,6 +386,7 @@ class Radiko : public WebRadio {
       HTTPClient http;
       String partialkey;
       String cookie;
+      String radiko_session;
       
       deInit();
       areaFree = false;
@@ -396,26 +397,18 @@ class Radiko : public WebRadio {
       buffer = new AudioFileSourceHLS(bufferSize);
       
       clients.setInsecure();
-      if (user && pass && http.begin(clients, "https://radiko.jp/ap/member/login/login")) {
+      if (user && pass && http.begin(clients, "https://radiko.jp/v4/api/member/login")) {
         http.addHeader("Content-Type", "application/x-www-form-urlencoded");
         http.collectHeaders(headerKeys, sizeof(headerKeys) / sizeof(headerKeys[0]));
         
         String payload = "mail=" + urlencode(String(user)) + "&pass=" + urlencode(String(pass));
         auto httpCode = http.POST(payload);
-        if (httpCode == HTTP_CODE_FOUND) {
-          cookie = http.header(headerKeys[3]);
-          auto semi = cookie.indexOf(";");
-          if(semi >= 0)
-            cookie = cookie.substring(0, semi + 1);
-        }
-        http.end();
-      }
-      
-      if (cookie.length() && http.begin(clients, "https://radiko.jp/ap/member/webapi/member/login/check")) {
-        http.addHeader("Cookie", cookie);
-        auto httpCode = http.GET();
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          getInner(http.getString(), "\"areafree\":\"", "\"", [this](const String & value) {
+          auto payload = http.getString();
+          getInner(payload, "\"radiko_session\":\"", "\"", [&](const String & value) {
+            radiko_session = String("?radiko_session=") + value;
+          }, true);
+          getInner(payload, "\"areafree\":\"", "\"", [this](const String & value) {
             if(value.equals("1"))
               areaFree = true;
           }, true);
@@ -444,16 +437,16 @@ class Radiko : public WebRadio {
           } else if(keyType == 1) {
             uint8_t key[length];
             unHex(&secret_key[offset * 2], key, length * 2);
-            partialkey = base64::encode(key, length);           
+            partialkey = base64::encode(key, length);
 //          partialkey = base64::encode(&secret_key[offset], length);  // when uint8_t[]
-          }
+          } 
           
-          token = http.header(headerKeys[0]);            
+          token = http.header(headerKeys[0]);
         }
         http.end();
       }
       
-      if (partialkey.length() && http.begin(clients, "https://radiko.jp/v2/api/auth2")) {
+      if (partialkey.length() && http.begin(clients, String("https://radiko.jp/v2/api/auth2") + radiko_session)) {
         http.addHeader("X-Radiko-App", X_Radiko_App[keyType]);
         http.addHeader("X-Radiko-App-Version", X_Radiko_App_Version[keyType]);
         http.addHeader("X-Radiko-User", X_Radiko_User);
@@ -474,7 +467,7 @@ class Radiko : public WebRadio {
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           auto payload = http.getString();
           area = payload.substring(0, payload.indexOf(","));
-        }   
+        }
         http.end();
       }
       
