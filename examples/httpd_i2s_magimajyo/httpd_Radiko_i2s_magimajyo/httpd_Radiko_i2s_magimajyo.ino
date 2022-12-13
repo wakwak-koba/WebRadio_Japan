@@ -14,7 +14,7 @@
 #include "LCD_MagimajyoPures.hpp"
 #include "lgfx_ja3_ayug.h"
 
-static AudioOutputI2S out(0, AudioOutputI2S::EXTERNAL_I2S, 9);
+static AudioOutputI2S out(0, AudioOutputI2S::EXTERNAL_I2S, 10);
 static Radiko radio(&out, APP_CPU_NUM);
 static WebServer httpd(80);
 static String stationName;
@@ -68,8 +68,11 @@ void setup() {
   radio.onPlay = [&](const char * station_name, const size_t station_idx) {
     Serial.printf("onPlay:%d %s\n", station_idx, station_name);
 #ifdef _LCD_MAGIMAJYO_PURES_HPP_
+    sprite.setFont(&font_L);
     sprite.clear();
     sprite.drawString(station_name, 0, 0);
+    sprite.setFont(&fonts::Font0);
+    sprite.drawString(WiFi.localIP().toString().c_str(), 550, 40);
     lcd.writeBuffer(sprite);
 #endif
     stationName = String(station_name);
@@ -78,9 +81,12 @@ void setup() {
     if(!programName.equals(text)) {
       Serial.printf("onProgram:%s\n", text);
 #ifdef _LCD_MAGIMAJYO_PURES_HPP_
+      sprite.setFont(&font_L);
       sprite.clear();
       sprite.drawString(stationName.c_str(), 0, 0);
       sprite.drawString(text, 0, 24);
+      sprite.setFont(&fonts::Font0);
+      sprite.drawString(WiFi.localIP().toString().c_str(), 550, 40);
       lcd.writeBuffer(sprite);
 #endif
       programName = String(text);

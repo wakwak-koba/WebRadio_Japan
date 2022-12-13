@@ -59,13 +59,6 @@ class AudioFileSourceHLS : public AudioFileSource {
       return readInternal(dst, length, true);
     }
 
-    virtual uint32_t readInternal(void *dst, uint32_t length, bool nonblock) {
-      auto rLen = buffer.read((uint8_t *)dst, length);
-      if(length && rLen < length)
-        cb.st(STATUS_TOO_SLOW, PSTR("receive is too slow.."));
-      return rLen;
-    }
-
     virtual void setTimeout(uint16_t _timeout) {
       src = nullptr;
       timeout = _timeout;
@@ -120,6 +113,13 @@ class AudioFileSourceHLS : public AudioFileSource {
     AudioFileSource * src;
     SimpleRingBuffer<uint8_t> buffer;
     uint16_t timeout;
+
+    virtual uint32_t readInternal(void *dst, uint32_t length, bool nonblock) {
+      auto rLen = buffer.read((uint8_t *)dst, length);
+      if(length && rLen < length)
+        cb.st(STATUS_TOO_SLOW, PSTR("receive is too slow.."));
+      return rLen;
+    }
 
   private:
     uint64_t millis_last_read = 0;

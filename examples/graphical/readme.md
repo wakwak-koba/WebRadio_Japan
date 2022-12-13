@@ -1,4 +1,4 @@
-# WebRadio_Jcbasimul / WebRadio_Radiko
+# WebRadio_Jcbasimul / WebRadio_Radiko / WebRadio_ListenRadio
 
 ### 機能
 - [WebRadio_with_ESP8266Audio](https://github.com/m5stack/M5Unified/tree/master/examples/Advanced/WebRadio_with_ESP8266Audio) をベースにした、グラフィカルなインターフェースのコード例です。
@@ -7,7 +7,7 @@
 ![image1](/docs/screenshot.png)
 
 ### ビルドに必要なライブラリ
-#### Jcbasimul / Radiko 共通
+#### Jcbasimul / Radiko / ListenRadio 共通
 - [espressif/arduino-esp32](https://github.com/espressif/arduino-esp32)
 - [m5stack/M5GFX](https://github.com/m5stack/M5GFX)
 - [m5stack/M5Unified](https://github.com/m5stack/M5Unified)
@@ -26,6 +26,7 @@
 |:--------:|:--------------------:|:--------------------:|:--------------------:|
 |Jcbasimul|v2.0.2/v2.0.3|v2.0.2/v2.0.5|v2.0.2/v2.0.4/v2.0.5|
 |Radiko|v2.0.2/v2.0.3/v2.0.5|v2.0.2/v2.0.5|v2.0.2/v2.0.4/v2.0.5|
+|ListenRadio|v2.0.2/v2.0.3/v2.0.5|v2.0.2/v2.0.5|v2.0.2/v2.0.4/v2.0.5|
 
 ## 使用方法
 ### WiFi設定

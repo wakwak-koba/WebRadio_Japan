@@ -218,6 +218,7 @@ class Jcbasimul : public WebRadio {
             source = nullptr;
             url = "error: " + url;
             getJcbasimul()->sendLog(url.c_str(), true);
+            delay(5000);
           } else
             getJcbasimul()->sendLog(url.c_str());
           
@@ -282,7 +283,8 @@ class Jcbasimul : public WebRadio {
       } else if(source && !decoder) {
         decoder = ((station_t *)current_station)->getDecoder();
       } else if (source && !source->isOpen()) {
-        Serial.println("source->isOpen(): false");
+        sendLog("source->isOpen(): false", true);
+        delay(5000);
         select_station = current_station;
       } else if (source && source->isOpen()) {
         static auto last_report = now_millis;
@@ -330,9 +332,10 @@ class Jcbasimul : public WebRadio {
         if (decoder->loop())
           last_loop = now_millis;
         else {
+          Serial.println(source->getSize());
           sendLog("failed: decoder->loop()", true);
+          delay(5000);
           select_station = current_station;
-          delay(1000);
         }
       } else if (now_millis - last_loop > 10000) {
         sendLog("Streaming reception time out", true);

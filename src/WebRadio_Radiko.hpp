@@ -412,7 +412,8 @@ class Radiko : public WebRadio {
             if(value.equals("1"))
               areaFree = true;
           }, true);
-        }
+        } else
+          sendLog(String("https://radiko.jp/v4/api/member/login ") + String(httpCode), true);
         http.end();
       }
       
@@ -545,9 +546,11 @@ class Radiko : public WebRadio {
         auto idx = getIndex(current_station);
         
         if(!begin()) {
-          sendLog("failed: radio.begin()", true);
-          ESP.restart();
+          delay(5000);
+          onSerious("failed: radio.begin()");
+          for(;;);
         }
+        
         play(stations[idx]);
 #ifdef SEPARATE_DOWNLOAD_TASK
         vTaskResume(download_handle);
@@ -623,6 +626,8 @@ class Radiko : public WebRadio {
         if(playlists && playlists->size() > 0)
           select_playlist = (*playlists)[0];
         else {
+          sendLog("select_station->getPlaylists(): false", true);
+          delay(5000);
           current_playlist = nullptr;
           token.clear();  // need reAuth
         }
@@ -639,9 +644,11 @@ class Radiko : public WebRadio {
       
       if(current_playlist && !chunks) {
         chunks = current_playlist->getChunks();
-        if(chunks == nullptr)
+        if(chunks == nullptr) {
+          sendLog("current_playlist->getChunks(): false", true);
+          delay(5000);
           select_station = current_station;
-        else if(onProgram)
+        } else if(onProgram)
           onProgram(((station_t *)current_station)->getProgram().c_str());
         chunk_index = 0;
       }

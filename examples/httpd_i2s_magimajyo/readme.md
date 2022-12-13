@@ -1,12 +1,12 @@
-# httpd_Jcbasimul_i2s_magimajyo / httpd_Radiko_i2s_magimajyo
+# httpd_Jcbasimul_i2s_magimajyo / httpd_Radiko_i2s_magimajyo / httpd_ListenRadio_i2s_magimajyo
 
 ### 機能
-- httpd_Jcbasimul_i2s / httpd_Radiko_i2s に加えて、マジョカアイリス を接続する前提で局名などが表示されます
+- httpd_Jcbasimul_i2s / httpd_Radiko_i2s / httpd_ListenRadio_i2s に加えて、マジョカアイリス を接続する前提で局名などが表示されます
 - Radiko では AAC-SBR を有効にし高音質で再生します
 - 液晶+SBR+Radikoプレミアム を全て有効にする場合には PSRAM を必要とします
 
 ### ビルドに必要なライブラリ
-#### Jcbasimul / Radiko 共通
+#### Jcbasimul / Radiko / ListenRadio 共通
 - [espressif/arduino-esp32](https://github.com/espressif/arduino-esp32)
 - [Lovyan03/LovyanGFX](https://github.com/lovyan03/LovyanGFX)
 - [wakwak-koba/ESP8266Audio](https://github.com/wakwak-koba/ESP8266Audio) forked from [earlephilhower/ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)

@@ -5,7 +5,7 @@
 #include <ArduinoOTA.h>
 #include <WebServer.h>
 
-static AudioOutputI2S out(0, AudioOutputI2S::EXTERNAL_I2S, 9);
+static AudioOutputI2S out(0, AudioOutputI2S::EXTERNAL_I2S, 10);
 static Jcbasimul radio(&out, APP_CPU_NUM);
 static WebServer httpd(80);
 static String stationName;

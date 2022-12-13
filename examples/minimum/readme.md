@@ -1,10 +1,10 @@
-# minimum_Jcbasimul / minimum_Radiko
+# minimum_Jcbasimul / minimum_Radiko / minimum_ListenRadio
 
 ### 機能
-- Jcbasimu / Radiko を M5Stack シリーズ（Gray/Fire/Core2等）の内蔵スピーカーで聴くための最小コード例です。
+- Jcbasimu / Radiko / ListenRadio を M5Stack シリーズ（Gray/Fire/Core2等）の内蔵スピーカーで聴くための最小コード例です。
 
 ### ビルドに必要なライブラリ
-#### Jcbasimul / Radiko 共通
+#### Jcbasimul / Radiko / ListenRadio 共通
 - [espressif/arduino-esp32](https://github.com/espressif/arduino-esp32)
 - [m5stack/M5GFX](https://github.com/m5stack/M5GFX)
 - [m5stack/M5Unified](https://github.com/m5stack/M5Unified)
@@ -23,3 +23,4 @@
 |:--------:|:--------------------:|:--------------------:|:--------------------:|
 |Jcbasimul|v2.0.2/v2.0.3|v2.0.2/v2.0.5|v2.0.2/v2.0.4/v2.0.5|
 |Radiko|v2.0.2/v2.0.3/v2.0.5|v2.0.2/v2.0.5|v2.0.2/v2.0.4/v2.0.5|
+|ListenRadio|v2.0.2/v2.0.3/v2.0.5|v2.0.2/v2.0.5|v2.0.2/v2.0.4/v2.0.5|

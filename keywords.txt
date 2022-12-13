@@ -7,8 +7,10 @@
 #######################################
 WebRadio_Jcbasimul	KEYWORD1
 WebRadio_Radiko	KEYWORD1
+WebRadio_ListenRadio	KEYWORD1
 Jcbasimul	KEYWORD1
 Radiko	KEYWORD1
+ListenRadio	KEYWORD1
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################

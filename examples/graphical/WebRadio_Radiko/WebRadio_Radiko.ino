@@ -434,7 +434,7 @@ void setup(void)
   if(M5.BtnA.isPressed() && M5.BtnB.isPressed() && M5.BtnC.isPressed()) {
     uint32_t nvs_handle;
     if(ESP_OK == nvs_open("WebRadio", NVS_READWRITE, &nvs_handle)) {
-      M5.Display.println("nvs_flash_ersce");
+      M5.Display.println("nvs_flash_erase");
       nvs_erase_all(nvs_handle);
       delay(3000);
     }

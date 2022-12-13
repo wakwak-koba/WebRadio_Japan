@@ -1,12 +1,12 @@
-# httpd_Jcbasimul_i2s / httpd_Radiko_i2s
+# httpd_Jcbasimul_i2s / httpd_Radiko_i2s / httpd_ListenRadio_i2s
 
 ### 機能
-- Jcbasimul / Radiko を受信し、I2S モジュールで出力します。
+- Jcbasimul / Radiko / ListenRadio を受信し、I2S モジュールで出力します。
 - 起動すると HTTPサーバー になり、ブラウザで選局できます。
 - PSRAM:Enabled に最適化してあります。なくても動きますが、音の途切れが発生する場合があります。
 
 ### ビルドに必要なライブラリ
-#### Jcbasimul / Radiko 共通
+#### Jcbasimul / Radiko / ListenRadio 共通
 - [espressif/arduino-esp32](https://github.com/espressif/arduino-esp32)
 - [wakwak-koba/ESP8266Audio](https://github.com/wakwak-koba/ESP8266Audio) forked from [earlephilhower/ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)
 #### Jcbasimul のみ
