@@ -1,0 +1,33 @@
+#######################################
+# Syntax Coloring Map for WebRadio_Japan
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+WebRadio_Jcbasimul	KEYWORD1
+WebRadio_Radiko	KEYWORD1
+WebRadio_ListenRadio	KEYWORD1
+WebRadio_FmPlapla	KEYWORD1
+Jcbasimul	KEYWORD1
+Radiko	KEYWORD1
+ListenRadio	KEYWORD1
+FmPlapla	KEYWORD1
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+onPlay	KEYWORD2
+onProgram	KEYWORD2
+onInfo	KEYWORD2
+onError	KEYWORD2
+setSyslog	KEYWORD2
+setAuthorization	KEYWORD2
+setEnableSBR	KEYWORD2
+setLocation	KEYWORD2
+begin		KEYWORD2
+play		KEYWORD2
+getNumOfStations	KEYWORD2
+#######################################
+# Constants (LITERAL1)
+#######################################
+
