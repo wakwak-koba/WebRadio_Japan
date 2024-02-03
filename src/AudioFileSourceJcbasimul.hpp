@@ -11,11 +11,11 @@
 
 class AudioFileSourceJcbasimul : public AudioFileSourceWebSockets {
   public:
-    AudioFileSourceJcbasimul(uint16_t buffSize = 8000) : AudioFileSourceWebSockets(buffSize), saveURL(nullptr), token(nullptr) {
+    AudioFileSourceJcbasimul(size_t buffSize = 8000) : AudioFileSourceWebSockets(buffSize), saveURL(nullptr), token(nullptr) {
       Init();
     }
 
-    AudioFileSourceJcbasimul(uint8_t *buffer, uint16_t buffSize) : AudioFileSourceWebSockets(buffer, buffSize), saveURL(nullptr), token(nullptr) {
+    AudioFileSourceJcbasimul(uint8_t *buffer, size_t buffSize) : AudioFileSourceWebSockets(buffer, buffSize), saveURL(nullptr), token(nullptr) {
       Init();
     }
 

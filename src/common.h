@@ -148,4 +148,13 @@ static String uncompress(uint8_t * source, const size_t len) {
   return result;
 }
 
+static String htmlDecode(String source) {
+  source.replace("&amp;", "&");
+  source.replace("&lt;", "<");
+  source.replace("&gt;", ">");
+  source.replace("&quot;", "\"");
+  source.replace("&apos;", "'");
+  return source;
+}
+
 #endif

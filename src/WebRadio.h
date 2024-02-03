@@ -74,6 +74,7 @@ class WebRadio {
   public:
     class Station {
       public:
+        virtual void dispose() {;}
         virtual const char * getName()  { return nullptr; }
         virtual bool play() { return radio->play(this); }
       protected:
@@ -269,11 +270,42 @@ class WebRadio {
       else
         return "";
     }
-    
+
+    virtual void restart(bool occurError) {
+      char  bufs[100];
+      bool result = false;
+      uint32_t nvs_handle;
+      if (ESP_OK == nvs_open("WebRadio", NVS_READWRITE, &nvs_handle)) {
+        uint8_t count = 0;
+        nvs_get_u8(nvs_handle, "restart", &count);
+        sprintf(bufs, "restart counter:%d\r\n", count);
+        sendLog(bufs, true);
+        if(occurError && count < 10) {
+          count ++;
+          nvs_set_u8(nvs_handle, "restart", count);
+          sendLog("restart counter incremented", true);
+          result = true;
+        } else if (!occurError && count) {
+          nvs_set_u8(nvs_handle, "restart", 0);
+          sendLog("restart counter", true);
+        } else if(occurError) {
+          sprintf(bufs, "restart counter:%d give up on restarting\r\n", count);
+          sendLog(bufs, true);
+          for(;;);
+        }
+        nvs_close(nvs_handle);
+      }
+      if(result) {
+        sendLog("restart..", true);
+        delay(1000);
+        ESP.restart();
+      }
+    }  
+
     std::function<void(const char *station_name, const size_t station_index)> onPlay = nullptr;
     std::function<void(const char *message)> onError = nullptr;
     std::function<void(const char *message)> onInfo = nullptr;
-    std::function<void(const char *message)> onSerious = [this] (const char *message) { if(onError) onError(message); ESP.restart(); };
+    std::function<void(const char *message)> onSerious = [this] (const char *message) { if(onError) onError(message); restart(true); };
     std::function<void(const char *program_title)> onProgram = nullptr;
     std::function<void(const char *message)> onUnrecover = nullptr;
 

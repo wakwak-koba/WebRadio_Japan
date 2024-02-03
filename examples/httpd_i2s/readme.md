@@ -15,14 +15,14 @@
 
 ### 配線
 
-|PCM5102Aモジュール|ESP32|
+|PCM5102Aモジュール|ESP32|ESP32S3|
 |:----:|:----:|
-|SCK|GND|
-|BCK|G26|
-|DIN|G22|
-|LCK|G25|
-|GND|GND|
-|VIN|3V3|
+|SCK|GND|GND|
+|BCK|G26|G15|
+|DIN|G22|G7|
+|LCK|G25|G6|
+|GND|GND|GND|
+|VIN|3V3|3V3|
 
 - 他のモジュールでも可能と思われます。
 - 上記以外のピンを使用する場合は、スケッチ内 out.SetPinout() でピン番号を指定して下さい。

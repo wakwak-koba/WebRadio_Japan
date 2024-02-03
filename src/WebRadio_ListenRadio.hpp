@@ -115,9 +115,9 @@ static const char * headerKeys[] = {"Content-Encoding"};
 class ListenRadio : public WebRadio {
   public:
 #ifndef SEPARATE_DOWNLOAD_TASK
-    ListenRadio(AudioOutput * _out, int cpuDecode, const uint16_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3) {
+    ListenRadio(AudioOutput * _out, int cpuDecode, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3) {
 #else
-    ListenRadio(AudioOutput * _out, int cpuDecode, const uint16_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3, 1 - cpuDecode, 2560) {
+    ListenRadio(AudioOutput * _out, int cpuDecode, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3, 1 - cpuDecode, 2560) {
 #endif
       for(int i = 0; i < sizeof(station_list) / sizeof(station_list[0]); i++)
         stations.push_back(new station_t(this, station_list[i].id, station_list[i].name));
@@ -139,9 +139,10 @@ class ListenRadio : public WebRadio {
       public:
         station_t(ListenRadio* _radio, const uint16_t _id, const char * _name) : Station(_radio), id(_id), name(_name)  {}
         ~station_t() {
-          clearPlaylists();
+          dispose();
         }
         
+        virtual void dispose() override { clearPlaylists(); }
         virtual const char * getName() override { return name; }
         virtual bool play() override {
           getListenRadio()->play(this);
@@ -164,6 +165,10 @@ class ListenRadio : public WebRadio {
           public:
             playlist_t(station_t* _station, const String & _url) : station(_station), url(_url) {;}
             ~playlist_t() {
+              dispose();
+            }
+            
+            virtual void dispose() {
               clearChunks();
             }
             
@@ -323,7 +328,7 @@ class ListenRadio : public WebRadio {
       deInit();
       
       if(!bufferSize)
-        bufferSize = std::max(6 * 1024, (int)std::min( (uint32_t)UINT16_MAX, heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
+        bufferSize = std::max(6 * 1024, (int)std::min( (size_t)(256 * 1024), heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
       
       buffer = new AudioFileSourceTS(bufferSize);
       buffer->identifyPid(0x101);
@@ -372,7 +377,7 @@ class ListenRadio : public WebRadio {
     AudioGeneratorAAC * decoder = nullptr;
     AudioFileSource * stream = nullptr;
     AudioFileSourceTS * buffer = nullptr;
-    uint16_t bufferSize;
+    size_t bufferSize;
     void * decode_buffer = nullptr;
     size_t decode_buffer_size;
     
@@ -410,8 +415,8 @@ class ListenRadio : public WebRadio {
         if(playlists && playlists->size() > 0) {
           select_playlist = (*playlists)[0];
         } else {
-          onError("select_station->getPlaylists(): false");
           current_playlist = nullptr;
+          onSerious("select_station->getPlaylists(): false");
         }
         current_station = select_station;
         if(onPlay)
@@ -420,8 +425,11 @@ class ListenRadio : public WebRadio {
       }
       
       if(select_playlist) {
+        auto last_station = current_station;
         current_station = select_playlist->getStation();
         current_playlist = select_playlist;
+        if(last_station && last_station != current_station)
+          last_station->dispose();
         if(onPlay)
           onPlay(current_station->getName(), getIndex(current_station));
         select_playlist = nullptr;
@@ -464,7 +472,8 @@ class ListenRadio : public WebRadio {
         if(!decoder->begin(buffer, out)) {
           delete decoder;
           decoder = nullptr;
-        }
+        } else
+            restart(false);
       }
       
       if(stream && stream->getPos() >= stream->getSize())
@@ -504,9 +513,12 @@ class ListenRadio : public WebRadio {
         while(stopDecode) {delay(100);}
       }
       
-      if(!decoder)
+      if(!decoder) {
+        if (current_playlist && now_millis - last_loop > 30000)
+          onSerious("Streaming reception aborted");
         return;
-        
+      }
+      
       if (decoder->isRunning()) {
         if(buffer->getSize() >= 2*1024) {
           if(decoder->loop())

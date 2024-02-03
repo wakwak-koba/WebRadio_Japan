@@ -11,11 +11,11 @@
 
 class AudioFileSourceWebSockets : public AudioFileSource {
   public:
-    AudioFileSourceWebSockets(uint16_t _buffSize) : buffer(_buffSize) {
+    AudioFileSourceWebSockets(size_t _buffSize) : buffer(_buffSize) {
       Init();
     }
     
-    AudioFileSourceWebSockets(uint8_t *_buffer, uint16_t _buffSize) : buffer(_buffer, _buffSize) {
+    AudioFileSourceWebSockets(uint8_t *_buffer, size_t _buffSize) : buffer(_buffer, _buffSize) {
       Init();
     }
     
@@ -28,7 +28,7 @@ class AudioFileSourceWebSockets : public AudioFileSource {
       return wss.isConnected();
     }
 
-    virtual uint32_t getSize() override {
+    virtual size_t getSize() override {
       return buffer.available();
     }
 
@@ -36,7 +36,7 @@ class AudioFileSourceWebSockets : public AudioFileSource {
       return true;
     }
 
-    virtual uint32_t read(void *data, uint32_t length) override {
+    virtual size_t read(void *data, size_t length) override {
       auto st = millis();
       while(getSize() < 1 && millis() - st < timeout) {
         delay(1);

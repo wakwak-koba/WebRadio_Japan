@@ -510,12 +510,12 @@ void setup(void)
     WiFi.mode(WIFI_MODE_STA);
   } else {
     M5.Display.println("Connecting to WiFi");
-    for(int i = 0; i < 100 && WiFi.status() != WL_CONNECTED; i++) {
-      M5.Display.print(".");
+    for(int count = 0; WiFi.status() != WL_CONNECTED; count++) {
+      if(count > 150)
+        ESP.restart();
+      Serial.print(".");
       delay(100);
     }
-    if(WiFi.status() != WL_CONNECTED)
-      ESP.restart();
   }
 
   Serial.print("IP address:");

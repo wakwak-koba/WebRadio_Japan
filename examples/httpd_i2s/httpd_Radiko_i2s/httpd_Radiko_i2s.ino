@@ -15,10 +15,17 @@ static String stationName;
 
 void setup() {
   Serial.begin(115200);
+
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+  out.SetPinout(15, 6, 7);    // bck, lrc, dout
+#else
 //out.SetPinout(26, 25, 22);  // bck, lrc, dout
+#endif
 
   WiFi.begin();
-  while(WiFi.status() != WL_CONNECTED) {
+  for(int count = 0; WiFi.status() != WL_CONNECTED; count++) {
+    if(count > 300)
+      ESP.restart();
     Serial.print(".");
     delay(100);
   }

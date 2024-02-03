@@ -10,35 +10,28 @@ class LCD_MagimajoPures : public lgfx::LGFX_Device
   lgfx::Bus_Parallel8 _bus_instance;
 
 public:
-  LCD_MagimajoPures(void)
+  LCD_MagimajoPures(int pin_wr, int pin_rd, int pin_rs, int pin_d0, int pin_d1, int pin_d2, int pin_d3, int pin_d4, int pin_d5, int pin_d6, int pin_d7, int pin_cs, int pin_rst)
   {
     {                                     // バス制御の設定を行います。
       auto cfg = _bus_instance.config(); // バス設定用の構造体を取得します。
 
       // 8ビットパラレルバスの設定
+#ifndef CONFIG_IDF_TARGET_ESP32S3
       cfg.i2s_port = I2S_NUM_1;  // 使用するI2Sポートを選択 (0 or 1) (ESP32のI2S LCDモードを使用します)
+#endif      
       cfg.freq_write = 16000000; // 送信クロック (最大20MHz, 80MHzを整数で割った値に丸められます)
-      cfg.pin_wr = 13;           // WR を接続しているピン番号     to LCD WR(14)
-      cfg.pin_rd = 12;           // RD を接続しているピン番号     to LCD RD(13)
-      cfg.pin_rs = 27;           // RS(D/C)を接続しているピン番号 to LCD DC(16)
-/*
-      cfg.pin_d0 = 21;           // D0を接続しているピン番号      to LCD D0(4)
-      cfg.pin_d1 = 19;           // D1を接続しているピン番号      to LCD D1(5)
-      cfg.pin_d2 = 18;           // D2を接続しているピン番号      to LCD D2(6)
-      cfg.pin_d3 =  5;           // D3を接続しているピン番号      to LCD D3(7)
-      cfg.pin_d4 = 17;           // D4を接続しているピン番号      to LCD D4(8)
-      cfg.pin_d5 = 16;           // D5を接続しているピン番号      to LCD D5(9)
-      cfg.pin_d6 =  4;           // D6を接続しているピン番号      to LCD D6(10)
-      cfg.pin_d7 = 15;           // D7を接続しているピン番号      to LCD D7(11)
-*/
-      cfg.pin_d0 = 23;           // D0を接続しているピン番号      to LCD D0(4)
-      cfg.pin_d1 = 21;           // D1を接続しているピン番号      to LCD D1(5)
-      cfg.pin_d2 = 19;           // D2を接続しているピン番号      to LCD D2(6)
-      cfg.pin_d3 = 18;           // D3を接続しているピン番号      to LCD D3(7)
-      cfg.pin_d4 =  5;           // D4を接続しているピン番号      to LCD D4(8)
-      cfg.pin_d5 =  4;           // D5を接続しているピン番号      to LCD D5(9)
-      cfg.pin_d6 =  2;           // D6を接続しているピン番号      to LCD D6(10)
-      cfg.pin_d7 = 15;           // D7を接続しているピン番号      to LCD D7(11)
+      cfg.pin_wr = pin_wr;       // WR を接続しているピン番号     to LCD WR(14)
+      cfg.pin_rd = pin_rd;       // RD を接続しているピン番号     to LCD RD(13)
+      cfg.pin_rs = pin_rs;       // RS(D/C)を接続しているピン番号 to LCD DC(16)
+
+      cfg.pin_d0 = pin_d0;       // D0を接続しているピン番号      to LCD D0(4)
+      cfg.pin_d1 = pin_d1;       // D1を接続しているピン番号      to LCD D1(5)
+      cfg.pin_d2 = pin_d2;       // D2を接続しているピン番号      to LCD D2(6)
+      cfg.pin_d3 = pin_d3;       // D3を接続しているピン番号      to LCD D3(7)
+      cfg.pin_d4 = pin_d4;       // D4を接続しているピン番号      to LCD D4(8)
+      cfg.pin_d5 = pin_d5;       // D5を接続しているピン番号      to LCD D5(9)
+      cfg.pin_d6 = pin_d6;       // D6を接続しているピン番号      to LCD D6(10)
+      cfg.pin_d7 = pin_d7;       // D7を接続しているピン番号      to LCD D7(11)
 
       _bus_instance.config(cfg);              // 設定値をバスに反映します。
       _panel_instance.setBus(&_bus_instance); // バスをパネルにセットします。
@@ -47,8 +40,8 @@ public:
     {                                       // 表示パネル制御の設定を行います。
       auto cfg = _panel_instance.config(); // 表示パネル設定用の構造体を取得します。
       
-      cfg.pin_cs = 14;   // CSが接続されているピン番号   (-1 = disable)  to LCD CS(12/15)
-      cfg.pin_rst = 33;  // RSTが接続されているピン番号  (-1 = disable)  to LCD RST(2)
+      cfg.pin_cs = pin_cs;      // CSが接続されているピン番号   (-1 = disable)  to LCD CS(12/15)
+      cfg.pin_rst = pin_rst;    // RSTが接続されているピン番号  (-1 = disable)  to LCD RST(2)
       cfg.pin_busy = -1; // BUSYが接続されているピン番号 (-1 = disable)
       
       // ※ 以下の設定値はパネル毎に一般的な初期値が設定されていますので、不明な項目はコメントアウトして試してみてください。

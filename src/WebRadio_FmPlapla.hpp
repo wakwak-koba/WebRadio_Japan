@@ -78,18 +78,18 @@ static byte initial_station = 58;   // FMみやこ
 class FmPlapla : public WebRadio {
   public:
 #ifndef SEPARATE_DOWNLOAD_TASK
-    FmPlapla(AudioOutput * _out, int cpuDecode, const UBaseType_t priorityDecode = 3, const uint16_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, priorityDecode) {
+    FmPlapla(AudioOutput * _out, int cpuDecode, const UBaseType_t priorityDecode = 3, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, priorityDecode) {
 #else
-    FmPlapla(AudioOutput * _out, int cpuDecode, const UBaseType_t priorityDecode = 3, const uint16_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, priorityDecode, 1 - cpuDecode, 4096) {
+    FmPlapla(AudioOutput * _out, int cpuDecode, const UBaseType_t priorityDecode = 3, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, priorityDecode, 1 - cpuDecode, 4096) {
 #endif
       for(int i = 0; i < sizeof(station_list) / sizeof(station_list[0]); i++)
         stations.push_back(new station_t(this, station_list[i][0], station_list[i][1]));
       defaultStationIdx = initial_station;
     }
 #ifndef SEPARATE_DOWNLOAD_TASK
-    FmPlapla(AudioOutput * _out, int cpuDecode, uint8_t * _buffer, const uint16_t buffSize) : buffer(_buffer), bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, 3) {
+    FmPlapla(AudioOutput * _out, int cpuDecode, uint8_t * _buffer, const size_t buffSize) : buffer(_buffer), bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, 3) {
 #else
-    FmPlapla(AudioOutput * _out, int cpuDecode, uint8_t * _buffer, const uint16_t buffSize) : buffer(_buffer), bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, 3, 1 - cpuDecode, 4096) {
+    FmPlapla(AudioOutput * _out, int cpuDecode, uint8_t * _buffer, const size_t buffSize) : buffer(_buffer), bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, 3, 1 - cpuDecode, 4096) {
 #endif
       for(int i = 0; i < sizeof(station_list) / sizeof(station_list[0]); i++)
         stations.push_back(new station_t(this, station_list[i][0], station_list[i][1]));
@@ -160,8 +160,14 @@ class FmPlapla : public WebRadio {
     };
 
     virtual bool begin() override {
+      auto psram = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+      if(!psram) {
+        onError("Requires PSRAM");
+        return false;
+      }
+
       if(!bufferSize)
-        bufferSize = std::max(5 * 1024, (int)std::min( (uint32_t)UINT16_MAX, heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
+        bufferSize = std::max(5 * 1024, (int)std::min( (size_t)(128 * 1024), psram));
       
       startTask();
       return true; 
@@ -199,15 +205,18 @@ class FmPlapla : public WebRadio {
       auto now_millis = millis();
       
       if (select_station) {
+        if(select_station != current_station)
+          saveSettings = millis() + 10000;
         stop();
         current_station = select_station;
         source = ((station_t *)current_station)->getSource();
-        if(source)
+        if(source) {
           decoder = ((station_t *)current_station)->getDecoder();
+          restart(false);
+        }
 
         if(onPlay)
           onPlay(current_station->getName(), getIndex(current_station));
-        saveSettings = millis() + 10000;
 
         select_station = nullptr;
       } else if (source && !source->isOpen()) {
@@ -245,12 +254,14 @@ class FmPlapla : public WebRadio {
         while(stopDecode) {delay(100);}
       }
       else if(!decoder) {
-        ;
+        if (current_station && now_millis - last_loop > 10000)
+          onSerious("Streaming reception aborted");
       } else if(!decoder->isRunning()) {
         if(source->getSize() >= (bufferSize >> 1) ) {
-          if(decoder->begin(source, out))
+          if(decoder->begin(source, out)) {
+            sendLog("success: decoder->begin(source, out)", true);
             last_loop = now_millis;
-          else {
+          } else {
             sendLog("failed: decoder->begin(source, out)", true);
             select_station = current_station;
             delay(1000);
@@ -294,7 +305,7 @@ class FmPlapla : public WebRadio {
     AudioFileSourceFmPlapla * source = nullptr;
     AudioGeneratorOpus * decoder = nullptr;
     uint8_t * buffer = nullptr;
-    uint16_t bufferSize;
+    size_t bufferSize;
     byte stopDecode = 0;    // 2:request stop 1:accept request
 
 };

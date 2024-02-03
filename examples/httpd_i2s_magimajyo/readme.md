@@ -15,40 +15,45 @@
 - [arduino-libraries/Arduino_JSON] は不要になりました
 
 ### 配線
-|PCM5102Aモジュール|ESP32|
+|PCM5102Aモジュール|ESP32|ESP32S3|
 |:----:|:----:|
-|SCK|GND|
-|BCK|G26|
-|DIN|G22|
-|LCK|G25|
-|GND|GND|
-|VIN|3V3|
+|SCK|GND|GND|
+|BCK|G26|G15|
+|DIN|G22|G7|
+|LCK|G25|G6|
+|GND|GND|GND|
+|VIN|3V3|3V3|
+|XSMT|3V3|G4
+|FMT|GND|G5|
+|SCK|GND|G16|
+|FLT|GND|G17|
+|DEMP|GND|G18|
+- ESP32S3 時の場合は拙作の WebRadioModule を前提にした配線を記載しましたが、XSMT/FMT/SCK/FLT/DEMP は ESP32 と同様の結線にしても問題ありません
 
-
-|マジョカアイリス|信号名|ESP32|
+|マジョカアイリス|信号名|ESP32|ESP32S3|
 |:----:|:--:|:----:|
-|1|GND|GND|
-|2|RST|G33|
-|3|GND|GND|
-|4|D0|G23|
-|5|D1|G21|
-|6|D2|G19|
-|7|D3|G18|
-|8|D4|G5|
-|9|D5|G4|
-|10|D6|G2|
-|11|D7|G15|
-|12|CS1|G14|
-|13|RD|G12|
-|14|WR|G13|
-|15|CS2|G14|
-|16|DC|G27|
-|18|VDD|3V3|
-|19|VDDIO|3V3|
-|20|LED+||
-|21|LED-||
-|22|GND|GND|
+|1|GND|GND|GND|
+|2|RST|G33|G8|
+|3|GND|GND|GND|
+|4|D0|G23|G3|
+|5|D1|G21|G46|
+|6|D2|G19|G9|
+|7|D3|G18|G10|
+|8|D4|G5|G11|
+|9|D5|G4|G12|
+|10|D6|G2|G13|
+|11|D7|G15|G14|
+|12|CS1|G14|G21|
+|13|RD|G12|G47|
+|14|WR|G13|G48|
+|15|CS2|G14|G21|
+|16|DC|G27|G45|
+|18|VDD|3V3|3V3|
+|19|VDDIO|3V3|3V3|
+|20|LED+|||
+|21|LED-|||
+|22|GND|GND|GND|
 - LED+／LED- はバックライト用で 5.5V～ が必要です。
-- ESP32-WROVER-B(PSRAMあり) でテストしています。
+- ESP32-WROVER-B / ESP32-S3-WROOM-1-N16R8 (ともにPSRAMあり)でテストしています。
 
 ![image1](/docs/magimajyo.JPG)

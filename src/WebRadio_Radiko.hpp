@@ -22,15 +22,15 @@ static const char * X_Radiko_Device         = "pc";
 class Radiko : public WebRadio {
   public:
 #ifndef SEPARATE_DOWNLOAD_TASK
-    Radiko(AudioOutput * _out, int cpuDecode, const uint16_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3) {
+    Radiko(AudioOutput * _out, int cpuDecode, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3) {
 #else
-    Radiko(AudioOutput * _out, int cpuDecode, const uint16_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3, 1 - cpuDecode, 2560) {
+    Radiko(AudioOutput * _out, int cpuDecode, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3, 1 - cpuDecode, 2560) {
 #endif
 //    decode_buffer = heap_caps_malloc(decode_buffer_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     }
     
     ~Radiko() {
-      setAuthorization();
+      setAuthorization(nullptr, nullptr);
       if(decoder)
         delete decoder;
       if(decode_buffer)
@@ -45,9 +45,10 @@ class Radiko : public WebRadio {
         
         station_t(Radiko* _radiko) : Station(_radiko) {;}
         ~station_t() {
-          clearPlaylists();
+          dispose();
         }
         
+        virtual void dispose() override { clearPlaylists(); }
         virtual const char * getName() override { return name.c_str(); }
         virtual bool play() override {
           getRadiko()->play(this);
@@ -66,9 +67,13 @@ class Radiko : public WebRadio {
           public:
             playlist_t(station_t* _station, const String & _url) : station(_station), url(_url) {;}
             ~playlist_t() {
-              clearChunks();
+              dispose();
             }
             
+            virtual void dispose() {
+              clearChunks();
+            }
+
             bool play() {
               getRadiko()->select_playlist = this;
               return true;
@@ -202,7 +207,7 @@ class Radiko : public WebRadio {
               stream->setTimeout(5000);
               String tagF = String("<station id=\"") + (String)id + String("\">");
               if(stream->find(tagF.c_str()) && stream->find("<title>"))
-                title = stream->readStringUntil('<');
+                title = htmlDecode(stream->readStringUntil('<'));
             } else {
               char bufs[strlen(url) + 10];
               sprintf(bufs, "%s %d", url, httpCode);
@@ -226,11 +231,27 @@ class Radiko : public WebRadio {
         std::vector<playlist_t *> playlists;
     };
     
-    void setAuthorization() {
-      setAuthorization(nullptr, nullptr);
+    void setAuthorization(const bool clear = false) {
+      if(clear)
+        setAuthorization(nullptr, nullptr, true);
+      else {
+        setAuthorization(nullptr, nullptr, false);
+        uint32_t nvs_handle;
+        if (ESP_OK == nvs_open("WebRadio", NVS_READWRITE, &nvs_handle)) {
+          size_t length1;
+          size_t length2;
+          if(ESP_OK == nvs_get_str(nvs_handle, "radiko_user", nullptr, &length1) && ESP_OK == nvs_get_str(nvs_handle, "radiko_pass", nullptr, &length2) && length1 && length2) {
+            char user[length1 + 1];
+            char pass[length2 + 1];
+            if(ESP_OK == nvs_get_str(nvs_handle, "radiko_user", user, &length1) && ESP_OK == nvs_get_str(nvs_handle, "radiko_pass", pass, &length2))
+              setAuthorization(user, pass, false);
+          }
+          nvs_close(nvs_handle);
+        }
+      }
     }
     
-    void setAuthorization(const char * user, const char *pass) {
+    void setAuthorization(const char * user, const char *pass, const bool save = false) {
       if(this->user) {
         delete this->user;
         this->user = nullptr;
@@ -240,14 +261,29 @@ class Radiko : public WebRadio {
         this->pass = nullptr;
       }
       
-      if(strlen(user)) {
+      if(user && strlen(user)) {
         this->user = new char[strlen(user) + 1];
         strcpy(this->user, user);
       
       }
-      if(strlen(pass)) {
+      if(pass && strlen(pass)) {
         this->pass = new char[strlen(pass) + 1];
         strcpy(this->pass, pass);
+      }
+
+      if(save) {
+        uint32_t nvs_handle;
+        if (ESP_OK == nvs_open("WebRadio", NVS_READWRITE, &nvs_handle)) {
+          if(!user || !pass) {
+            nvs_erase_key(nvs_handle, "radiko_user");
+            nvs_erase_key(nvs_handle, "radiko_pass");
+          } else {
+            nvs_set_str(nvs_handle, "radiko_user", user);
+            nvs_set_str(nvs_handle, "radiko_pass", pass);
+          }
+          nvs_commit(nvs_handle);
+          nvs_close(nvs_handle);
+        }
       }
     }
     
@@ -280,7 +316,10 @@ class Radiko : public WebRadio {
     bool begin(const char *secret_key) {
       if(strlen(secret_key) != 40 && strlen(secret_key) != 32000)
         return false;     
-      
+
+      if(!user && !pass)
+        setAuthorization();
+
       if(!decode_buffer) {
         decode_buffer_size = enableSBR ? 89444: 26368;
         decode_buffer = heap_caps_malloc(decode_buffer_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
@@ -298,7 +337,7 @@ class Radiko : public WebRadio {
       areaFree = false;
       
       if(!bufferSize)
-        bufferSize = std::max(6 * 1024, (int)std::min( (uint32_t)UINT16_MAX, heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
+        bufferSize = std::max(6 * 1024, (int)std::min( (size_t)(256 * 1024), heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
       
       buffer = new AudioFileSourceHLS(bufferSize);
       
@@ -319,7 +358,7 @@ class Radiko : public WebRadio {
               areaFree = true;
           }, true);
         } else
-          sendLog(String("https://radiko.jp/v4/api/member/login ") + String(httpCode), true);
+          onSerious((String("https://radiko.jp/v4/api/member/login ") + String(httpCode)).c_str());
         http.end();
       }
       
@@ -349,7 +388,8 @@ class Radiko : public WebRadio {
           } 
           
           token = http.header(headerKeys[0]);
-        }
+        } else
+          onSerious((String("https://radiko.jp/v2/api/auth1 ") + String(httpCode)).c_str());
         http.end();
       }
       
@@ -374,7 +414,8 @@ class Radiko : public WebRadio {
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           auto payload = http.getString();
           area = payload.substring(0, payload.indexOf(","));
-        }
+        } else
+          onSerious((String("https://radiko.jp/v2/api/auth2 ") + String(httpCode)).c_str());
         http.end();
       }
       
@@ -391,12 +432,13 @@ class Radiko : public WebRadio {
             if(stream->find("<id>"))
               station->id = stream->readStringUntil('<');
             if(stream->find("<name>"))
-              station->name = stream->readStringUntil('<');
+              station->name = htmlDecode(stream->readStringUntil('<'));
             if(stream->find("<area_id>"))
               station->area = stream->readStringUntil('<');
             stations.push_back(station);
           }
-        }
+        } else
+          onSerious((String("https://radiko.jp/v3/station/region/full.xml ") + String(httpCode)).c_str());
         http.end();
       } else {
         if(cookie.length() && select_pref)
@@ -409,11 +451,12 @@ class Radiko : public WebRadio {
               getInner(http.getStreamPtr(), "station", [&](const String & value) {
                 auto station = new station_t(this);
                 getInner(value, "id"         , [station](const String & value) { station->id   = value; });
-                getInner(value, "name"       , [station](const String & value) { station->name = value; });
+                getInner(value, "name"       , [station](const String & value) { station->name = htmlDecode(value); });
                 station->area = area;
                 stations.push_back(station);
               } );
-          }
+          } else
+            onSerious((String(url) + String(" ") + String(httpCode)).c_str());
           http.end();
         }
       }
@@ -422,6 +465,7 @@ class Radiko : public WebRadio {
         return false;
       
       startTask();
+      restart(false);
       return true;
     }
     
@@ -483,7 +527,7 @@ class Radiko : public WebRadio {
     AudioGeneratorAAC * decoder = nullptr;
     AudioFileSource * stream = nullptr;
     AudioFileSourceHLS * buffer = nullptr;
-    uint16_t bufferSize;
+    size_t bufferSize;
     void * decode_buffer = nullptr;
     size_t decode_buffer_size;
     
@@ -524,25 +568,27 @@ class Radiko : public WebRadio {
       if(select_station || select_playlist) {
         stop();
         chunks = nullptr;
-        saveSettings = millis() + 10000;
       }
       
       if(select_station) {
         auto playlists = ((station_t *)select_station)->getPlaylists();
-        if(playlists && playlists->size() > 0)
+        if(playlists && playlists->size() > 0) {
           select_playlist = (*playlists)[0];
-        else {
-          sendLog("select_station->getPlaylists(): false", true);
-          delay(5000);
+          saveSettings = millis() + 10000;
+        } else {
           current_playlist = nullptr;
+          onSerious("select_station->getPlaylists(): false");
 //        token.clear();  // need reAuth
         }
         select_station = nullptr;
       }
       
       if(select_playlist) {
+        auto last_station = current_station;
         current_station = select_playlist->getStation();
         current_playlist = select_playlist;
+        if(last_station && last_station != current_station)
+          last_station->dispose();
         if(onPlay)
           onPlay(current_station->getName(), getIndex(current_station));
         select_playlist = nullptr;
@@ -624,9 +670,12 @@ class Radiko : public WebRadio {
         while(stopDecode) {delay(100);}
       }
       
-      if(!decoder)
+      if(!decoder) {
+        if (current_playlist && now_millis - last_loop > 10000)
+          onSerious("Streaming reception aborted");
         return;
-        
+      }
+      
       if (decoder->isRunning()) {
         if(buffer->getSize() >= 2*1024) {
           if(decoder->loop())

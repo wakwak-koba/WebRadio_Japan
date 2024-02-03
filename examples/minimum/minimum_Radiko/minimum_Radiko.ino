@@ -15,13 +15,13 @@ void setup() {
 //  cfg.external_spk_detail.omit_spk_hat    = true; // exclude SPK HAT
 //  cfg.external_speaker.module_rca = true; // RCA Module 13.2
     M5.begin(cfg);
-  }
   
-  if(!cfg.external_speaker.module_rca) { /// custom setting
-    auto cfg = M5.Speaker.config();
-    cfg.sample_rate = 144000; // default:64000 (64kHz)  e.g. 48000 , 50000 , 80000 , 96000 , 100000 , 128000 , 144000 , 192000 , 200000
-    cfg.task_pinned_core = m5spk_task_pinned_core;
-    M5.Speaker.config(cfg);
+    if(!cfg.external_speaker.module_rca) { /// custom setting
+      auto cfg = M5.Speaker.config();
+      cfg.sample_rate = 144000; // default:64000 (64kHz)  e.g. 48000 , 50000 , 80000 , 96000 , 100000 , 128000 , 144000 , 192000 , 200000
+      cfg.task_pinned_core = m5spk_task_pinned_core;
+      M5.Speaker.config(cfg);
+    }
   }
 
   WiFi.begin();

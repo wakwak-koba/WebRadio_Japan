@@ -11,11 +11,11 @@
 
 class AudioFileSourceFmPlapla : public AudioFileSourceWebSockets {
   public:
-    AudioFileSourceFmPlapla(uint16_t buffSize = 8000) : AudioFileSourceWebSockets(buffSize), saveURL(nullptr), token(nullptr) {
+    AudioFileSourceFmPlapla(size_t buffSize = 8000) : AudioFileSourceWebSockets(buffSize), saveURL(nullptr), token(nullptr) {
       Init();
     }
 
-    AudioFileSourceFmPlapla(uint8_t *buffer, uint16_t buffSize) : AudioFileSourceWebSockets(buffer, buffSize), saveURL(nullptr), token(nullptr) {
+    AudioFileSourceFmPlapla(uint8_t *buffer, size_t buffSize) : AudioFileSourceWebSockets(buffer, buffSize), saveURL(nullptr), token(nullptr) {
       Init();
     }
 
@@ -39,6 +39,7 @@ class AudioFileSourceFmPlapla : public AudioFileSourceWebSockets {
         https->addHeader("Origin", "https://fmplapla.com");
         auto httpCode = https->POST(nullptr, 0);
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+          String location;
           auto payload = https->getString();
           getInner(payload, "\"location\":\"", "\"", [&](const String & value) {
             location = value;
