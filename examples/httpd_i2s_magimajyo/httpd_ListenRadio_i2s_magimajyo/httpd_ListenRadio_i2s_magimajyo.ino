@@ -176,6 +176,7 @@ void setup() {
       "<head>"
       "<title>WebRadio_ListenRadio</title>"
       "<meta charset=\"UTF-8\">"
+      "</head>"
       "<frameset rows=\"96,*\" cols=\"*\" frameborder=\"no\">"
       "  <frame src=\"top\" name=\"top\" frameborder=\"no\" scrolling=\"no\" />"
       "  <frame src=\"list\" name=\"list\" frameborder=\"no\" scrolling=\"auto\" />"

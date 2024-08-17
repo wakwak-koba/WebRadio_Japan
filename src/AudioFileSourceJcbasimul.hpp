@@ -11,11 +11,11 @@
 
 class AudioFileSourceJcbasimul : public AudioFileSourceWebSockets {
   public:
-    AudioFileSourceJcbasimul(size_t buffSize = 8000) : AudioFileSourceWebSockets(buffSize), saveURL(nullptr), token(nullptr) {
+    AudioFileSourceJcbasimul(uint32_t buffSize = 8000) : AudioFileSourceWebSockets(buffSize), saveURL(nullptr), token(nullptr) {
       Init();
     }
 
-    AudioFileSourceJcbasimul(uint8_t *buffer, size_t buffSize) : AudioFileSourceWebSockets(buffer, buffSize), saveURL(nullptr), token(nullptr) {
+    AudioFileSourceJcbasimul(uint8_t *buffer, uint32_t buffSize) : AudioFileSourceWebSockets(buffer, buffSize), saveURL(nullptr), token(nullptr) {
       Init();
     }
 
@@ -93,7 +93,7 @@ class AudioFileSourceJcbasimul : public AudioFileSourceWebSockets {
       }
     }
     
-    virtual void onBinary(uint8_t * payload, size_t length) override {
+    virtual void onBinary(uint8_t * payload, uint32_t length) override {
       auto f = buffer.free();
       auto segnum = payload[26];
       while(f < length && segnum > 0) {

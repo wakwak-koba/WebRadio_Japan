@@ -10,20 +10,20 @@
 
 class AudioFileSourceHLS : public AudioFileSource {
   public:
-    AudioFileSourceHLS(size_t _buffSize) : buffer(_buffSize) {
+    AudioFileSourceHLS(uint32_t _buffSize) : buffer(_buffSize) {
       init();
     }
     
-    AudioFileSourceHLS(uint8_t *_buffer, size_t _buffSize) : buffer(_buffer, _buffSize) {
+    AudioFileSourceHLS(uint8_t *_buffer, uint32_t _buffSize) : buffer(_buffer, _buffSize) {
       init();
     }
 
-    AudioFileSourceHLS(AudioFileSource * _src, uint16_t _buffSize) : buffer(_buffSize) {
+    AudioFileSourceHLS(AudioFileSource * _src, uint32_t _buffSize) : buffer(_buffSize) {
       init();
       setSource(_src);
     }
     
-    AudioFileSourceHLS(AudioFileSource * _src, uint8_t *_buffer, uint16_t _buffSize) : buffer(_buffer, _buffSize) {
+    AudioFileSourceHLS(AudioFileSource * _src, uint8_t *_buffer, uint32_t _buffSize) : buffer(_buffer, _buffSize) {
       init();
       setSource(_src);
     }
@@ -43,7 +43,7 @@ class AudioFileSourceHLS : public AudioFileSource {
       return src;
     }
 
-    virtual size_t getSize() override {
+    virtual uint32_t getSize() override {
       return buffer.available();
     }
 
@@ -51,11 +51,11 @@ class AudioFileSourceHLS : public AudioFileSource {
       return src && src->loop();
     }
 
-    virtual size_t read(void *dst, size_t length) override {
+    virtual uint32_t read(void *dst, uint32_t length) override {
       return readInternal(dst, length, false);
     }
 
-    virtual size_t readNonBlock(void *dst, size_t length) override {
+    virtual uint32_t readNonBlock(void *dst, uint32_t length) override {
       return readInternal(dst, length, true);
     }
 
@@ -114,7 +114,7 @@ class AudioFileSourceHLS : public AudioFileSource {
     SimpleRingBuffer<uint8_t> buffer;
     uint16_t timeout;
 
-    virtual size_t readInternal(void *dst, size_t length, bool nonblock) {
+    virtual uint32_t readInternal(void *dst, uint32_t length, bool nonblock) {
       auto rLen = buffer.read((uint8_t *)dst, length);
       if(length && rLen < length)
         cb.st(STATUS_TOO_SLOW, PSTR("receive is too slow.."));

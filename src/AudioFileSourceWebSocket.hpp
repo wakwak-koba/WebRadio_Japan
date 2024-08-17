@@ -11,11 +11,11 @@
 
 class AudioFileSourceWebSockets : public AudioFileSource {
   public:
-    AudioFileSourceWebSockets(size_t _buffSize) : buffer(_buffSize) {
+    AudioFileSourceWebSockets(uint32_t _buffSize) : buffer(_buffSize) {
       Init();
     }
     
-    AudioFileSourceWebSockets(uint8_t *_buffer, size_t _buffSize) : buffer(_buffer, _buffSize) {
+    AudioFileSourceWebSockets(uint8_t *_buffer, uint32_t _buffSize) : buffer(_buffer, _buffSize) {
       Init();
     }
     
@@ -28,7 +28,7 @@ class AudioFileSourceWebSockets : public AudioFileSource {
       return wss.isConnected();
     }
 
-    virtual size_t getSize() override {
+    virtual uint32_t getSize() override {
       return buffer.available();
     }
 
@@ -36,7 +36,7 @@ class AudioFileSourceWebSockets : public AudioFileSource {
       return true;
     }
 
-    virtual size_t read(void *data, size_t length) override {
+    virtual uint32_t read(void *data, uint32_t length) override {
       auto st = millis();
       while(getSize() < 1 && millis() - st < timeout) {
         delay(1);
@@ -71,7 +71,7 @@ class AudioFileSourceWebSockets : public AudioFileSource {
     
     virtual void onConnect() { ; }
     
-    virtual void onBinary(uint8_t * payload, size_t length) {
+    virtual void onBinary(uint8_t * payload, uint32_t length) {
       buffer.write(payload, length);
     }
 
@@ -81,7 +81,7 @@ class AudioFileSourceWebSockets : public AudioFileSource {
       wss.onConnect = [&]() {
         onConnect();
       };
-      wss.onBinary = [&](uint8_t * payload, size_t length) {
+      wss.onBinary = [&](uint8_t * payload, uint32_t length) {
         onBinary(payload, length);
       };
     }

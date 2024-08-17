@@ -18,6 +18,11 @@ void setup() {
 
 #ifdef CONFIG_IDF_TARGET_ESP32S3
   out.SetPinout(15, 6, 7);    // bck, lrc, dout
+  pinMode( 4, OUTPUT); digitalWrite( 4, LOW);   // XSMT
+  pinMode( 5, OUTPUT); digitalWrite( 5, LOW);   // FMT
+  pinMode(16, OUTPUT); digitalWrite(16, LOW);   // SCK
+  pinMode(17, OUTPUT); digitalWrite(17, LOW);   // FLT
+  pinMode(18, OUTPUT); digitalWrite(18, LOW);   // DEMP
 #else
 //out.SetPinout(26, 25, 22);  // bck, lrc, dout
 #endif
@@ -117,6 +122,7 @@ void setup() {
       "<head>"
       "<title>WebRadio_Radiko</title>"
       "<meta charset=\"UTF-8\">"
+      "</head>"
       "<frameset rows=\"96,*\" cols=\"*\" frameborder=\"no\">"
       "  <frame src=\"top\" name=\"top\" frameborder=\"no\" scrolling=\"no\" />"
       "  <frame src=\"list\" name=\"list\" frameborder=\"no\" scrolling=\"auto\" />"
@@ -131,8 +137,10 @@ void setup() {
   });
 
   httpd.begin();
-  
   radio.play();
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+  digitalWrite( 4, HIGH);  // XSMT
+#endif
 }
 
 void loop() {

@@ -10,7 +10,7 @@
 #include "WebRadio.h"
 
 // https://fmplapla.com/api/select_stream?station=radioodate&burst=5
-static constexpr const size_t decode_stack_size = 16*1024;
+static constexpr const uint32_t decode_stack_size = 16*1024;
 static constexpr const char* station_list[][2] =
 {
 /*00*/	{"FMラジオおおだて / 秋田県大館市","radioodate"},
@@ -78,18 +78,18 @@ static byte initial_station = 58;   // FMみやこ
 class FmPlapla : public WebRadio {
   public:
 #ifndef SEPARATE_DOWNLOAD_TASK
-    FmPlapla(AudioOutput * _out, int cpuDecode, const UBaseType_t priorityDecode = 3, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, priorityDecode) {
+    FmPlapla(AudioOutput * _out, int cpuDecode, const UBaseType_t priorityDecode = 3, const uint32_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, priorityDecode) {
 #else
-    FmPlapla(AudioOutput * _out, int cpuDecode, const UBaseType_t priorityDecode = 3, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, priorityDecode, 1 - cpuDecode, 4096) {
+    FmPlapla(AudioOutput * _out, int cpuDecode, const UBaseType_t priorityDecode = 3, const uint32_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, priorityDecode, 1 - cpuDecode, 4096) {
 #endif
       for(int i = 0; i < sizeof(station_list) / sizeof(station_list[0]); i++)
         stations.push_back(new station_t(this, station_list[i][0], station_list[i][1]));
       defaultStationIdx = initial_station;
     }
 #ifndef SEPARATE_DOWNLOAD_TASK
-    FmPlapla(AudioOutput * _out, int cpuDecode, uint8_t * _buffer, const size_t buffSize) : buffer(_buffer), bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, 3) {
+    FmPlapla(AudioOutput * _out, int cpuDecode, uint8_t * _buffer, const uint32_t buffSize) : buffer(_buffer), bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, 3) {
 #else
-    FmPlapla(AudioOutput * _out, int cpuDecode, uint8_t * _buffer, const size_t buffSize) : buffer(_buffer), bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, 3, 1 - cpuDecode, 4096) {
+    FmPlapla(AudioOutput * _out, int cpuDecode, uint8_t * _buffer, const uint32_t buffSize) : buffer(_buffer), bufferSize(buffSize), WebRadio(_out, cpuDecode, decode_stack_size, 3, 1 - cpuDecode, 4096) {
 #endif
       for(int i = 0; i < sizeof(station_list) / sizeof(station_list[0]); i++)
         stations.push_back(new station_t(this, station_list[i][0], station_list[i][1]));
@@ -167,7 +167,7 @@ class FmPlapla : public WebRadio {
       }
 
       if(!bufferSize)
-        bufferSize = std::max(5 * 1024, (int)std::min( (size_t)(128 * 1024), psram));
+        bufferSize = std::max(5UL * 1024UL, std::min(128UL * 1024UL, (uint32_t)psram));
       
       startTask();
       return true; 
@@ -305,7 +305,7 @@ class FmPlapla : public WebRadio {
     AudioFileSourceFmPlapla * source = nullptr;
     AudioGeneratorOpus * decoder = nullptr;
     uint8_t * buffer = nullptr;
-    size_t bufferSize;
+    uint32_t bufferSize;
     byte stopDecode = 0;    // 2:request stop 1:accept request
 
 };

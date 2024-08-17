@@ -484,9 +484,9 @@ void setup(void)
   {
     uint32_t nvs_handle;
     if (ESP_OK == nvs_open("WebRadio", NVS_READONLY, &nvs_handle)) {
-      size_t volume;
-      nvs_get_u32(nvs_handle, "volume", &volume);
-      M5.Speaker.setVolume(volume);
+      uint32_t volume;
+      if (ESP_OK == nvs_get_u32(nvs_handle, "volume", &volume))
+        M5.Speaker.setVolume(volume);
       nvs_close(nvs_handle);
     }
   }
@@ -631,7 +631,7 @@ void loop(void)
   {
     uint32_t nvs_handle;
     if (ESP_OK == nvs_open("WebRadio", NVS_READWRITE, &nvs_handle)) {
-      size_t volume = M5.Speaker.getVolume();
+      uint32_t volume = M5.Speaker.getVolume();
       nvs_set_u32(nvs_handle, "volume", volume);
       nvs_close(nvs_handle);
     }

@@ -5,6 +5,8 @@
 #ifndef _WAKWAK_KOBA_WEBRADIO_LISTENRADIO_HPP_
 #define _WAKWAK_KOBA_WEBRADIO_LISTENRADIO_HPP_
 
+#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
 #include <AudioGeneratorAAC.h>
 #include <AudioFileSourceHTTPStream.h>
 #include "AudioFileSourceTS.hpp"
@@ -115,9 +117,9 @@ static const char * headerKeys[] = {"Content-Encoding"};
 class ListenRadio : public WebRadio {
   public:
 #ifndef SEPARATE_DOWNLOAD_TASK
-    ListenRadio(AudioOutput * _out, int cpuDecode, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3) {
+    ListenRadio(AudioOutput * _out, int cpuDecode, const uint32_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3) {
 #else
-    ListenRadio(AudioOutput * _out, int cpuDecode, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3, 1 - cpuDecode, 2560) {
+    ListenRadio(AudioOutput * _out, int cpuDecode, const uint32_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3, 1 - cpuDecode, 2560) {
 #endif
       for(int i = 0; i < sizeof(station_list) / sizeof(station_list[0]); i++)
         stations.push_back(new station_t(this, station_list[i].id, station_list[i].name));
@@ -235,9 +237,9 @@ class ListenRadio : public WebRadio {
                 auto httpCode = http.GET();
                 if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
                   auto payload = http.getString();
+                  
                   if(http.header(headerKeys[0]).equalsIgnoreCase("gzip"))
                     payload = uncompress((uint8_t *)(payload.c_str()), payload.length());
-                  
                   getInner(payload, "media", "\n", [this](const String & value) {
                     auto url = getStation()->getUrl() + value;
                     chunks.push_back(new chunk_t(this, url));
@@ -328,7 +330,7 @@ class ListenRadio : public WebRadio {
       deInit();
       
       if(!bufferSize)
-        bufferSize = std::max(6 * 1024, (int)std::min( (size_t)(256 * 1024), heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
+        bufferSize = std::max(6UL * 1024UL, std::min(256UL * 1024UL, (uint32_t)heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
       
       buffer = new AudioFileSourceTS(bufferSize);
       buffer->identifyPid(0x101);
@@ -377,9 +379,9 @@ class ListenRadio : public WebRadio {
     AudioGeneratorAAC * decoder = nullptr;
     AudioFileSource * stream = nullptr;
     AudioFileSourceTS * buffer = nullptr;
-    size_t bufferSize;
+    uint32_t bufferSize;
     void * decode_buffer = nullptr;
-    size_t decode_buffer_size;
+    uint32_t decode_buffer_size;
     
     station_t::playlist_t * select_playlist = nullptr;
     station_t::playlist_t * current_playlist = nullptr;

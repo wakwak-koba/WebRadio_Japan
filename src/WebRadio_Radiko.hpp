@@ -5,6 +5,8 @@
 #ifndef _WAKWAK_KOBA_WEBRADIO_RADIKO_HPP_
 #define _WAKWAK_KOBA_WEBRADIO_RADIKO_HPP_
 
+#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
 #include <AudioGeneratorAAC.h>
 #include <AudioFileSourceHTTPStream.h>
 #include "AudioFileSourceHLS.hpp"
@@ -22,9 +24,9 @@ static const char * X_Radiko_Device         = "pc";
 class Radiko : public WebRadio {
   public:
 #ifndef SEPARATE_DOWNLOAD_TASK
-    Radiko(AudioOutput * _out, int cpuDecode, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3) {
+    Radiko(AudioOutput * _out, int cpuDecode, const uint32_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3) {
 #else
-    Radiko(AudioOutput * _out, int cpuDecode, const size_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3, 1 - cpuDecode, 2560) {
+    Radiko(AudioOutput * _out, int cpuDecode, const uint32_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2048, 3, 1 - cpuDecode, 2560) {
 #endif
 //    decode_buffer = heap_caps_malloc(decode_buffer_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     }
@@ -337,7 +339,7 @@ class Radiko : public WebRadio {
       areaFree = false;
       
       if(!bufferSize)
-        bufferSize = std::max(6 * 1024, (int)std::min( (size_t)(256 * 1024), heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
+        bufferSize = std::max(6UL * 1024UL, std::min(256UL * 1024UL, (uint32_t)heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
       
       buffer = new AudioFileSourceHLS(bufferSize);
       
@@ -527,9 +529,9 @@ class Radiko : public WebRadio {
     AudioGeneratorAAC * decoder = nullptr;
     AudioFileSource * stream = nullptr;
     AudioFileSourceHLS * buffer = nullptr;
-    size_t bufferSize;
+    uint32_t bufferSize;
     void * decode_buffer = nullptr;
-    size_t decode_buffer_size;
+    uint32_t decode_buffer_size;
     
     char * user = nullptr;;
     char * pass = nullptr;;

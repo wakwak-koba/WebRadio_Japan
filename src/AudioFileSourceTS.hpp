@@ -10,10 +10,10 @@
 
 class AudioFileSourceTS : public AudioFileSourceHLS {
   public:
-    AudioFileSourceTS(size_t _buffSize) : AudioFileSourceHLS(_buffSize) {}
-    AudioFileSourceTS(uint8_t *_buffer, size_t _buffSize) : AudioFileSourceHLS(_buffer, _buffSize) {}
-    AudioFileSourceTS(AudioFileSource * _src, size_t _buffSize) : AudioFileSourceHLS(_src, _buffSize) {}
-    AudioFileSourceTS(AudioFileSource * _src, uint8_t *_buffer, size_t _buffSize) : AudioFileSourceHLS(_src, _buffer, _buffSize) {}
+    AudioFileSourceTS(uint32_t _buffSize) : AudioFileSourceHLS(_buffSize) {}
+    AudioFileSourceTS(uint8_t *_buffer, uint32_t _buffSize) : AudioFileSourceHLS(_buffer, _buffSize) {}
+    AudioFileSourceTS(AudioFileSource * _src, uint32_t _buffSize) : AudioFileSourceHLS(_src, _buffSize) {}
+    AudioFileSourceTS(AudioFileSource * _src, uint8_t *_buffer, uint32_t _buffSize) : AudioFileSourceHLS(_src, _buffer, _buffSize) {}
 
     void identifyPid(uint16_t _pid) {
       PID = _pid;

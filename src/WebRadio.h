@@ -8,6 +8,7 @@
 #include <functional>
 #include <vector>
 #include <nvs.h>
+#include <WiFiUdp.h>
 
 static void voidDownloadTask(void *radio);
 static void voidDecodeTask(void *radio);
@@ -213,7 +214,7 @@ class WebRadio {
     virtual void stop() {}
     virtual void handle() {;}
     
-    virtual size_t getNumOfStations() { return stations.size(); }
+    virtual uint32_t getNumOfStations() { return stations.size(); }
     virtual Station * getStation() {
       return current_station;
     }
@@ -225,7 +226,7 @@ class WebRadio {
       return -1;
     }
     
-    virtual Station * getStation(size_t index) {
+    virtual Station * getStation(uint32_t index) {
       if(index >= stations.size())
         return nullptr;
     
@@ -273,36 +274,42 @@ class WebRadio {
 
     virtual void restart(bool occurError) {
       char  bufs[100];
-      bool result = false;
+      bool autoRestart = false;
       uint32_t nvs_handle;
       if (ESP_OK == nvs_open("WebRadio", NVS_READWRITE, &nvs_handle)) {
         uint8_t count = 0;
         nvs_get_u8(nvs_handle, "restart", &count);
         sprintf(bufs, "restart counter:%d\r\n", count);
         sendLog(bufs, true);
+        bool delay30min = false;
         if(occurError && count < 10) {
           count ++;
           nvs_set_u8(nvs_handle, "restart", count);
           sendLog("restart counter incremented", true);
-          result = true;
+          autoRestart = true;
         } else if (!occurError && count) {
           nvs_set_u8(nvs_handle, "restart", 0);
-          sendLog("restart counter", true);
+          sendLog("reset restart counter", true);
         } else if(occurError) {
-          sprintf(bufs, "restart counter:%d give up on restarting\r\n", count);
-          sendLog(bufs, true);
-          for(;;);
+          nvs_set_u8(nvs_handle, "restart", count - 3);
+          sendLog("will try again in 30 minutes", true);
+          delay30min = true;
         }
         nvs_close(nvs_handle);
+        
+        if(delay30min) {
+          autoRestart = true;
+          delay(1800000UL);
+        }
       }
-      if(result) {
+      if(autoRestart) {
         sendLog("restart..", true);
         delay(1000);
         ESP.restart();
       }
     }  
 
-    std::function<void(const char *station_name, const size_t station_index)> onPlay = nullptr;
+    std::function<void(const char *station_name, const uint32_t station_index)> onPlay = nullptr;
     std::function<void(const char *message)> onError = nullptr;
     std::function<void(const char *message)> onInfo = nullptr;
     std::function<void(const char *message)> onSerious = [this] (const char *message) { if(onError) onError(message); restart(true); };
@@ -315,7 +322,7 @@ class WebRadio {
     Station * current_station = nullptr;
     Station * select_station = nullptr;
     unsigned long long saveSettings = 0;
-    size_t defaultStationIdx = 0;
+    uint32_t defaultStationIdx = 0;
     
     TaskHandle_t download_handle;
     TaskHandle_t decode_handle;

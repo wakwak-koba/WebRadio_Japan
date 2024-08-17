@@ -6,6 +6,7 @@
 #define _WAKWAK_KOBA_WEBRADIO_COMMON_H_
 
 #include <Arduino.h>
+#include <WiFi.h>
 #include "uzlib/uzlib.h"
 
 
@@ -63,7 +64,7 @@ static uint8_t asc2byte(const char chr) {
   return rVal;
 }
 
-static void unHex(const char * inP, uint8_t * outP, size_t len) {
+static void unHex(const char * inP, uint8_t * outP, uint32_t len) {
   for (; len > 1; len -= 2) {
     uint8_t val = asc2byte(*inP++) << 4;
     *outP++ = val | asc2byte(*inP++);
@@ -104,8 +105,8 @@ static String urlencode(String str)
     return encodedString;
 }
 
-static String uncompress(uint8_t * source, const size_t len) {
-  size_t dlen;
+static String uncompress(uint8_t * source, const uint32_t len) {
+  uint32_t dlen;
   dlen =            source[len - 1];
   dlen = 256*dlen + source[len - 2];
   dlen = 256*dlen + source[len - 3];
@@ -124,9 +125,10 @@ static String uncompress(uint8_t * source, const size_t len) {
   d.source_read_cb = nullptr;
 
   auto res = uzlib_gzip_parse_header(&d);
-  if (res != TINF_OK)
+  if (res != TINF_OK) {
+      free(dest);
       return String("");
-
+  }
   d.dest_start = d.dest = dest;
 
   while (dlen) {
@@ -139,9 +141,10 @@ static String uncompress(uint8_t * source, const size_t len) {
       }
   }  
   
-  if (res != TINF_DONE)
+  if (res != TINF_DONE) {
+    free(dest);
     return String("");
-  
+  }
   dest[outlen] = 0;
   auto result = String((char *)dest);
   free(dest);
