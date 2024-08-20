@@ -167,7 +167,7 @@ class FmPlapla : public WebRadio {
       }
 
       if(!bufferSize)
-        bufferSize = std::max(5UL * 1024UL, std::min(128UL * 1024UL, (uint32_t)psram));
+        bufferSize = std::max((uint32_t)(5 * 1024), std::min((uint32_t)(128 * 1024), (uint32_t)psram));
       
       startTask();
       return true; 

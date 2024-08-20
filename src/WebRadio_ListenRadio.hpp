@@ -330,7 +330,7 @@ class ListenRadio : public WebRadio {
       deInit();
       
       if(!bufferSize)
-        bufferSize = std::max(6UL * 1024UL, std::min(256UL * 1024UL, (uint32_t)heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
+        bufferSize = std::max((uint32_t)(6 * 1024), std::min((uint32_t)(256 * 1024), (uint32_t)heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
       
       buffer = new AudioFileSourceTS(bufferSize);
       buffer->identifyPid(0x101);
