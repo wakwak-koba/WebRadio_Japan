@@ -13,8 +13,6 @@
 #include <WebRadio_FmPlapla.h>
 #include <AudioOutputM5Speaker.h>
 
-static constexpr uint8_t select_pref = 0;
-
 /// set M5Speaker virtual channel (0-7)
 static constexpr uint8_t m5spk_virtual_channel = 0;
 static constexpr uint8_t m5spk_task_pinned_core = APP_CPU_NUM;

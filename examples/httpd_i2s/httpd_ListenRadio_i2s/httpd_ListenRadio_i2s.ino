@@ -87,7 +87,7 @@ void setup() {
     String htmlHeader = 
       "<!DOCTYPE html><html>"
       "<head>"
-      "<title>WebRadio_Radiko</title>"
+      "<title>WebRadio_ListenRadio</title>"
       "<meta charset=\"UTF-8\">"
       "<script type=\"text/javascript\">"
       "  function  sel(index) {"

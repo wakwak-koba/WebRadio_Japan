@@ -307,7 +307,14 @@ class WebRadio {
         delay(1000);
         ESP.restart();
       }
-    }  
+    }
+  
+    virtual void restart(const char *reason) {
+      char  bufs[100];
+      sprintf(bufs, "requested restart: %s", reason);
+      sendLog(bufs, true);
+      restart(true);
+    }
 
     std::function<void(const char *station_name, const uint32_t station_index)> onPlay = nullptr;
     std::function<void(const char *message)> onError = nullptr;

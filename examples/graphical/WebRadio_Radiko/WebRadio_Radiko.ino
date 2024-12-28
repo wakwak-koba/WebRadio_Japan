@@ -12,7 +12,6 @@
 #include <M5Unified.h>
 #include <nvs.h>
 
-//#define SEPARATE_DOWNLOAD_TASK
 #include <WebRadio_Radiko.h>
 #include <AudioOutputM5Speaker.h>
 
