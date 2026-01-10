@@ -77,14 +77,6 @@ class AudioFileSourceFmPlapla : public AudioFileSourceWebSockets {
         return false;
     }
 
-    String getInfoBuffer() {
-      return "Buffer: " + buffer.getInfo();
-    }
-
-    uint64_t getTotalTransferred() {
-      return buffer.getTotalWrite();
-    }
-    
   protected:
     virtual void onConnect() override {
       if(token) {

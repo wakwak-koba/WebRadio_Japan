@@ -3,6 +3,7 @@
 //#define RADIKO_USER "SET YOUR MAIL-ADDRESS"
 //#define RADIKO_PASS "SET YOUR PREMIUM PASS"
 
+#include <WiFi.h>
 #include <WebRadio_Radiko.h>
 #include <AudioOutputI2S.h>
 #include <ArduinoOTA.h>

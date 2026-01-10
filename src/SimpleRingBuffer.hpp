@@ -5,13 +5,13 @@
 #ifndef _WAKWAK_KOBA_SIMPLE_RINGBUFFER_HPP_
 #define _WAKWAK_KOBA_SIMPLE_RINGBUFFER_HPP_
 
+#include <functional>
+
 template <typename T>
 class SimpleRingBuffer {
   public:
-    SimpleRingBuffer(uint32_t _buffSize) : buffSize(_buffSize), writeMode(0), deallocateBuffer(true) {
+    SimpleRingBuffer(uint32_t _buffSize) : buffSize(_buffSize + 1), writeMode(0), deallocateBuffer(true) {
       buffer = new T[buffSize];
-      if(!buffer)
-        Serial.printf("failed buffer = new T[%d]\n", buffSize);
       init();
     }
 
@@ -30,22 +30,26 @@ class SimpleRingBuffer {
       readSum = 0;
       writeSum = 0;
     }
-    
+
+    void clear() {
+      init();
+    }
+
     uint32_t available() {
       if (readPtr > writePtr)
         return buffSize + writePtr - readPtr;
       else
         return            writePtr - readPtr;
     }
-    
+
     uint32_t size() {
       return buffSize;
     }
-    
+
     uint32_t free() {
       return buffSize - available() - 1;
     }
-    
+
     uint32_t write(T *payload, uint32_t length) {
       if (!payload || !length || length > buffSize) return 0;
 
@@ -104,6 +108,12 @@ class SimpleRingBuffer {
       return wlen;
     }
 
+    bool peek(T *data) {
+      if (available() < 1) return false;
+      memcpy(data, &buffer[readPtr], sizeof(T));
+      return true;
+    }
+
     uint32_t read(T *data, uint32_t length) {
       length = std::min(length, available());
       if (!data || !length) return 0;
@@ -139,7 +149,7 @@ class SimpleRingBuffer {
     uint64_t getTotalWrite() {
       return writeSum;
     }
-    
+
   private:
     T *buffer;
     uint32_t buffSize;

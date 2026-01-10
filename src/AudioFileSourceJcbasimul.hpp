@@ -75,14 +75,6 @@ class AudioFileSourceJcbasimul : public AudioFileSourceWebSockets {
       else
         return false;
     }
-
-    String getInfoBuffer() {
-      return "Buffer: " + buffer.getInfo();
-    }
-
-    uint64_t getTotalTransferred() {
-      return buffer.getTotalWrite();
-    }
     
   protected:
     virtual void onConnect() override {

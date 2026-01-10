@@ -56,6 +56,15 @@ class AudioFileSourceWebSockets : public AudioFileSource {
     
     enum { STATUS_TOO_SLOW=10 };
     
+
+    String getInfoBuffer() {
+      return "Buffer: " + buffer.getInfo();
+    }
+
+    uint64_t getTotalTransferred() {
+      return buffer.getTotalWrite();
+    }
+
   protected:   
     virtual bool waitConnect() {
       if(wss.isConnected())

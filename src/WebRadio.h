@@ -5,6 +5,7 @@
 #ifndef _WAKWAK_KOBA_WEBRADIO_HPP_
 #define _WAKWAK_KOBA_WEBRADIO_HPP_
 
+#include <AudioOutput.h>
 #include <functional>
 #include <vector>
 #include <nvs.h>
@@ -97,6 +98,8 @@ class WebRadio {
     ~WebRadio() {
       if(download_handle)
         vTaskDelete(download_handle);
+      if(decoder)
+        delete decoder;
       if(decode_handle)
         vTaskDelete(decode_handle);
       deInit();
@@ -324,6 +327,7 @@ class WebRadio {
     std::function<void(const char *message)> onUnrecover = nullptr;
 
   protected:
+	AudioGenerator * decoder = nullptr;
     AudioOutput * out = nullptr;
     std::vector<Station *> stations;
     Station * current_station = nullptr;

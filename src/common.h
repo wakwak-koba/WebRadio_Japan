@@ -6,7 +6,6 @@
 #define _WAKWAK_KOBA_WEBRADIO_COMMON_H_
 
 #include <Arduino.h>
-#include <WiFi.h>
 #include "uzlib/uzlib.h"
 
 

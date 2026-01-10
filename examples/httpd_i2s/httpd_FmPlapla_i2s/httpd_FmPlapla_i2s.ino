@@ -1,5 +1,6 @@
 // https://twitter.com/wakwak-koba/
 
+#include <WiFi.h>
 #include <WebRadio_FmPlapla.h>
 #include <AudioOutputI2S.h>
 #include <ArduinoOTA.h>
