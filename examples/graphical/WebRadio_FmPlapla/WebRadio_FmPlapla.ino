@@ -417,6 +417,7 @@ void gfxLoop(LGFX_Device* gfx)
 void setup(void)
 {
   audioLogger = &Serial;
+  SPI.end();
   
   auto cfg = M5.config();
 
@@ -426,8 +427,9 @@ void setup(void)
 //cfg.external_speaker.module_rca = true; // RCA Module 13.2
 
   M5.begin(cfg);
+  Serial.begin(115200);
   M5.update();
-  if(M5.BtnA.isPressed() && M5.BtnB.isPressed() && M5.BtnC.isPressed()) {
+  if(M5.BtnA.isPressed() && (M5.BtnB.isPressed() || M5.BtnC.isPressed())) {
     uint32_t nvs_handle;
     if(ESP_OK == nvs_open("WebRadio", NVS_READWRITE, &nvs_handle)) {
       M5.Display.println("nvs_flash_erase");
@@ -459,26 +461,30 @@ void setup(void)
   WiFi.begin();
 
   /// settings
-  if (SD.begin(GPIO_NUM_4, SPI, 25000000)) {
-    /// wifi
-    auto fs = SD.open("/wifi.txt", FILE_READ);
-    if(fs) {
-      size_t sz = fs.size();
-      char buf[sz + 1];
-      fs.read((uint8_t*)buf, sz);
-      buf[sz] = 0;
-      fs.close();
+  {
+    auto sd_spi_sclk = M5.getPin(m5::pin_name_t::sd_spi_sclk);
+    auto sd_spi_ss = M5.getPin(m5::pin_name_t::sd_spi_ss);
+    if(sd_spi_sclk >= 0 && SPI.begin(sd_spi_sclk, M5.getPin(m5::pin_name_t::sd_spi_miso), M5.getPin(m5::pin_name_t::sd_spi_mosi), sd_spi_ss) && SD.begin(sd_spi_ss, SPI, 25000000)) {
+      /// wifi
+      auto fs = SD.open("/wifi.txt", FILE_READ);
+      if(fs) {
+        size_t sz = fs.size();
+        char buf[sz + 1];
+        fs.read((uint8_t*)buf, sz);
+        buf[sz] = 0;
+        fs.close();
 
-      int y = 0;
-      for(int x = 0; x < sz; x++) {
-        if(buf[x] == 0x0a || buf[x] == 0x0d)
-          buf[x] = 0;
-        else if (!y && x > 0 && !buf[x - 1] && buf[x])
-          y = x;
+        int y = 0;
+        for(int x = 0; x < sz; x++) {
+          if(buf[x] == 0x0a || buf[x] == 0x0d)
+            buf[x] = 0;
+          else if (!y && x > 0 && !buf[x - 1] && buf[x])
+            y = x;
+        }
+        WiFi.begin(buf, &buf[y]);
       }
-      WiFi.begin(buf, &buf[y]);
+      SD.end();
     }
-    SD.end();
   }
 
   {
