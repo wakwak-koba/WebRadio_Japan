@@ -517,7 +517,7 @@ void Radiko :: decodeTaskCore() {
   }
 
   if(!decoder) {
-    if (current_playlist && now_millis - last_loop > 10000)
+    if (current_playlist && now_millis - last_loop > 30000)
       onSerious("Streaming reception aborted");
     return;
   }

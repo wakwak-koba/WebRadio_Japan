@@ -200,7 +200,7 @@ void FmPlapla :: decodeTaskCore() {
     while(stopDecode) {delay(100);}
   }
   else if(!decoder) {
-    if (current_station && now_millis - last_loop > 10000)
+    if (current_station && now_millis - last_loop > 30000)
       onSerious("Streaming reception aborted");
   } else if(!decoder->isRunning()) {
     if(source->getSize() >= (bufferSize >> 1) ) {
