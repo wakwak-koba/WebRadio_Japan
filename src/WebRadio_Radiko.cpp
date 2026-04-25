@@ -10,6 +10,7 @@
 #include <base64.h>
 
 static const char * headerKeys[] = {"x-radiko-authtoken", "x-radiko-keyoffset", "x-radiko-keylength", "Set-Cookie"};
+static const char * headerKeys_program[] = {"Content-Encoding"};
 
 static const char * X_Radiko_App[]          = {"pc_html5", "aSmartPhone7a"};
 static const char * X_Radiko_App_Version[]  = {"0.0.1", "7.4.6"};
@@ -118,13 +119,23 @@ String Radiko :: station_t :: getProgram() {
   char url[40 + strlen(area.c_str())];
   sprintf(url, "http://radiko.jp/v3/program/now/%s.xml", area.c_str());
   if (http.begin(client, url)) {
+    http.collectHeaders(headerKeys_program, sizeof(headerKeys_program) / sizeof(headerKeys_program[0]));
     auto httpCode = http.GET();
     if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-      auto stream = http.getStreamPtr();
-      stream->setTimeout(5000);
+      auto payload = http.getString();
+      
+      getRadiko()->sendLog(http.header(headerKeys_program[0]).c_str());
+      if(http.header(headerKeys_program[0]).equalsIgnoreCase("gzip"))
+        payload = uncompress((uint8_t *)(payload.c_str()), payload.length());
+      
+      title = "";
       String tagF = String("<station id=\"") + (String)id + String("\">");
-      if(stream->find(tagF.c_str()) && stream->find("<title>"))
-        title = htmlDecode(stream->readStringUntil('<'));
+      getInner(payload, tagF, "</station>", [&](const String & value) {
+        getInner(value, "<title>", "</title>", [&](const String & value) {
+          if(title.length() == 0)
+            title = htmlDecode(value);
+        }, true);
+      });
     } else {
       char bufs[strlen(url) + 10];
       sprintf(bufs, "%s %d", url, httpCode);
