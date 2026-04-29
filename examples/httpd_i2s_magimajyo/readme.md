@@ -9,10 +9,9 @@
 #### Jcbasimul / Radiko / ListenRadio / FM++ 共通
 - [espressif/arduino-esp32](https://github.com/espressif/arduino-esp32)
 - [Lovyan03/LovyanGFX](https://github.com/lovyan03/LovyanGFX)
-- [wakwak-koba/ESP8266Audio](https://github.com/wakwak-koba/ESP8266Audio) forked from [earlephilhower/ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)
+- [wakwak-koba/ESP8266Audio](https://github.com/wakwak-koba/ESP8266Audio) forked from earlephilhower/ESP8266Audio または [earlephilhower/ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)
 #### Jcbasimul / FM++ のみ
 - [Links2004/arduinoWebSockets](https://github.com/Links2004/arduinoWebSockets)
-- [arduino-libraries/Arduino_JSON] は不要になりました
 
 ### 配線
 |PCM5102Aモジュール|ESP32|ESP32S3|

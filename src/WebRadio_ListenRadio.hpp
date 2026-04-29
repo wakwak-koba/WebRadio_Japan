@@ -17,7 +17,12 @@ class ListenRadio : public WebRadio {
 #else
     ListenRadio(AudioOutput * _out, int cpuDecode, const uint32_t buffSize = 0) : bufferSize(buffSize), WebRadio(_out, cpuDecode, 2560, 3, 1 - cpuDecode, 2560)
 #endif
-    {}
+    {
+#if __has_include(<allocate-memory.h>) && !__has_include(<ESP8266AudioVer.h>)
+#else
+      enableSBR = true;
+#endif
+    }
     
     ~ListenRadio() {
       if(decode_buffer)

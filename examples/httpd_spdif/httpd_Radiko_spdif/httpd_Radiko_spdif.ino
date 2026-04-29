@@ -22,7 +22,7 @@ void setup() {
   out.SetPinout(32);  // spdif out
 #endif
 
-  WiFi.begin("espressif", "espressif");
+  WiFi.begin();
   for(int count = 0; WiFi.status() != WL_CONNECTED; count++) {
     if(count > 300)
       ESP.restart();

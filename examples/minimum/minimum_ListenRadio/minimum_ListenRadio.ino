@@ -1,3 +1,4 @@
+#include <WiFi.h>
 #include <M5Unified.h>
 #include <WebRadio_ListenRadio.h>
 #include <AudioOutputM5Speaker.h>

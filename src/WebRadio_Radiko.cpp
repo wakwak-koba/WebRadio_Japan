@@ -20,11 +20,19 @@ static const char * X_Radiko_Device         = "pc";
 AudioGenerator * Radiko :: station_t :: playlist_t :: getDecoder() {
   auto radiko = getRadiko();
   AudioGenerator * decoder;
+
+#if __has_include(<allocate-memory.h>) && !__has_include(<ESP8266AudioVer.h>)
   if(radiko->decode_buffer != nullptr)
     decoder = new AudioGeneratorAAC(radiko->decode_buffer, radiko->decode_buffer_size, radiko->enableSBR);
   else
     decoder = new AudioGeneratorAAC(radiko->enableSBR);
-
+#else
+  if(radiko->decode_buffer != nullptr)
+    decoder = new AudioGeneratorAAC(radiko->decode_buffer, radiko->decode_buffer_size);
+  else
+    decoder = new AudioGeneratorAAC();
+#endif
+  
   decoder->RegisterMetadataCB(radiko->fnCbMetadata, radiko->fnCbMetadata_data);
   decoder->RegisterStatusCB  (radiko->fnCbStatus  , radiko->fnCbStatus_data  );
   return decoder;
@@ -223,8 +231,10 @@ void Radiko :: setLocation(float lat, float lon) {
 }
 
 void Radiko :: setEnableSBR(bool sbr) {
+#if __has_include(<allocate-memory.h>) && !__has_include(<ESP8266AudioVer.h>)
   if(!decode_buffer)
     enableSBR = sbr;
+#endif
 }
 
 bool Radiko :: begin(const char *secret_key) {

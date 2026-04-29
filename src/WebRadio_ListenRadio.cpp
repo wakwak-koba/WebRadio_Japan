@@ -101,10 +101,18 @@ static const char * headerKeys[] = {"Content-Encoding"};
 AudioGenerator * ListenRadio :: station_t :: playlist_t :: getDecoder() {
   auto ListenRadio = getListenRadio();
   AudioGenerator * decoder;
+
+#if __has_include(<allocate-memory.h>) && !__has_include(<ESP8266AudioVer.h>)
   if(ListenRadio->decode_buffer != nullptr)
     decoder = new AudioGeneratorAAC(ListenRadio->decode_buffer, ListenRadio->decode_buffer_size, ListenRadio->enableSBR);
   else
     decoder = new AudioGeneratorAAC(ListenRadio->enableSBR);
+#else
+  if(ListenRadio->decode_buffer != nullptr)
+    decoder = new AudioGeneratorAAC(ListenRadio->decode_buffer, ListenRadio->decode_buffer_size);
+  else
+    decoder = new AudioGeneratorAAC();
+#endif
   
   decoder->RegisterMetadataCB(ListenRadio->fnCbMetadata, ListenRadio->fnCbMetadata_data);
   decoder->RegisterStatusCB  (ListenRadio->fnCbStatus  , ListenRadio->fnCbStatus_data  );
@@ -207,8 +215,10 @@ void ListenRadio :: station_t :: clearPlaylists() {
 
 
 void ListenRadio :: setEnableSBR(bool sbr) {
+#if __has_include(<allocate-memory.h>) && !__has_include(<ESP8266AudioVer.h>)
   if(!decode_buffer)
     enableSBR = sbr;
+#endif
 }
 
 bool ListenRadio :: begin() {
