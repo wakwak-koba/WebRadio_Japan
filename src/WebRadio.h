@@ -322,7 +322,7 @@ class WebRadio {
     std::function<void(const char *station_name, const uint32_t station_index)> onPlay = nullptr;
     std::function<void(const char *message)> onError = nullptr;
     std::function<void(const char *message)> onInfo = nullptr;
-    std::function<void(const char *message)> onSerious = [this] (const char *message) { if(onError) onError(message); restart(true); };
+    std::function<void(const char *message)> onSerious = [this] (const char *message) { if(onError) onError(message); restart(message); };
     std::function<void(const char *program_title)> onProgram = nullptr;
     std::function<void(const char *message)> onUnrecover = nullptr;
 

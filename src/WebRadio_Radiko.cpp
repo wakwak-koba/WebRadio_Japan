@@ -57,16 +57,68 @@ std::vector<Radiko :: station_t :: playlist_t :: chunk_t *> * Radiko :: station_
   HTTPClient http;
   bool success = false;
 
-  clearChunks();
-
-  if (http.begin(client, url)) {
+  int chunks_size = chunks.size();
+  auto m3u8 = getUrl();
+  
+  if (http.begin(client, m3u8)) {
     http.addHeader("X-Radiko-AuthToken", getRadiko()->token);
     auto httpCode = http.GET();
     if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
       getInner(http.getString(), "http://", "\n", [this](const String & value) {
-        chunks.push_back(new Radiko :: station_t :: playlist_t :: chunk_t(this, value));
+        bool found = false;
+        for(auto itr:chunks) {
+          if(value == itr->url) {
+            found = true;
+            break;
+          }
+        }
+        if(!found)
+          chunks.push_back(new Radiko :: station_t :: playlist_t :: chunk_t(this, value));
       });
       success = true;
+    } else {
+      char bufs[m3u8.length() + 10];
+      sprintf(bufs, "%s %d", m3u8.c_str(), httpCode);
+      getRadiko()->sendLog(bufs, true);
+    }
+    http.end();
+  }
+  clearChunks(chunks_size);
+  if(success)
+    return &chunks;
+  else
+    return nullptr;
+}
+
+void Radiko :: station_t :: playlist_t :: clearChunks(int clearSize) {
+  if(!chunks.size() || !clearSize)
+    return;
+
+  if(clearSize <= 0)
+    clearSize = chunks.size();
+
+  for (int i = 0; i < clearSize; i++)
+    delete chunks[i];
+  chunks.erase(chunks.begin(), chunks.begin() + clearSize);
+}
+
+std::vector<Radiko :: station_t :: playlist_t *> * Radiko :: station_t :: getPlaylists() {
+  clearPlaylists();
+  playlists.push_back(new Radiko :: station_t :: playlist_t(this, String("https://radiko.jp/v2/api/playlist_create/") + id + String("?l=300") ));
+  return &playlists;
+}
+
+String Radiko :: station_t :: playlist_t :: getUrl() {
+  WiFiClientSecure clients;
+  HTTPClient http;
+  String result;
+  
+  clients.setInsecure();
+  if (http.begin(clients, url)) {
+    http.addHeader("X-Radiko-AuthToken", getRadiko()->token);
+    auto httpCode = http.GET();
+    if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+      result = http.getString();
     } else {
       char bufs[url.length() + 10];
       sprintf(bufs, "%s %d", url.c_str(), httpCode);
@@ -74,49 +126,7 @@ std::vector<Radiko :: station_t :: playlist_t :: chunk_t *> * Radiko :: station_
     }
     http.end();
   }
-  if(success)
-    return &chunks;
-  else
-    return nullptr;
-}
-
-void Radiko :: station_t :: playlist_t :: clearChunks() {
-  for (auto itr : chunks)
-    delete itr;
-  chunks.clear();
-}
-
-
-std::vector<Radiko :: station_t :: playlist_t *> * Radiko :: station_t :: getPlaylists() {
-  WiFiClient client;
-  HTTPClient http;
-  bool success = false;
-
-  clearPlaylists();
-
-  char url[120 + id.length()];
-  sprintf(url, "http://f-radiko.smartstream.ne.jp/%s/_definst_/simul-stream.stream/playlist.m3u8", id.c_str());
-  if (http.begin(client, url)) {
-    http.addHeader("X-Radiko-AuthToken", getRadiko()->token);
-    auto httpCode = http.GET();
-    if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-      auto m3u8 = http.getString();
-      getRadiko()->sendLog(m3u8.c_str(), true);
-      getInner(m3u8, "http://", "\n", [this](const String & value) {
-        playlists.push_back(new Radiko :: station_t :: playlist_t(this, value));
-      });
-      success = true;
-    } else {
-      char bufs[strlen(url) + 10];
-      sprintf(bufs, "%s %d", url, httpCode);
-      getRadiko()->sendLog(bufs, true);
-    }
-    http.end();
-  }
-  if(success)
-    return &playlists;
-  else
-    return nullptr;
+  return result;
 }
 
 String Radiko :: station_t :: getProgram() {

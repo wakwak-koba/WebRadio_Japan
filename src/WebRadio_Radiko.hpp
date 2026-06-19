@@ -58,8 +58,10 @@ class Radiko : public WebRadio {
             station_t * getStation() { return station; }
             Radiko * getRadiko() { return getStation()->getRadiko(); }
             AudioGenerator * getDecoder();
+            String getUrl();
             
             struct chunk_t {
+              friend struct playlist_t;
               private:
                 playlist_t* playlist;
                 String url;
@@ -76,7 +78,7 @@ class Radiko : public WebRadio {
             
             std::vector<chunk_t *> * getChunks();
           private:
-            void clearChunks();
+            void clearChunks(int clearSize = -1);
           private:
             std::vector<chunk_t *> chunks;
         };
