@@ -115,14 +115,21 @@ String Radiko :: station_t :: playlist_t :: getUrl() {
   
   clients.setInsecure();
   if (http.begin(clients, url)) {
-    http.addHeader("X-Radiko-AuthToken", getRadiko()->token);
-    auto httpCode = http.GET();
-    if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-      result = http.getString();
-    } else {
-      char bufs[url.length() + 10];
-      sprintf(bufs, "%s %d", url.c_str(), httpCode);
-      getRadiko()->sendLog(bufs, true);
+    for(int retry = 0; retry < 2; retry++ ) {
+      http.addHeader("X-Radiko-AuthToken", getRadiko()->token);
+      auto httpCode = http.GET();
+      if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+        result = http.getString();
+        break;
+      } else if (httpCode == HTTP_CODE_FORBIDDEN && getRadiko()->authenticate()) {
+        // 再認証したうえで再試行する
+        ;
+      } else {
+        char bufs[url.length() + 10];
+        sprintf(bufs, "%s %d", url.c_str(), httpCode);
+        getRadiko()->sendLog(bufs, true);
+        break;
+      }
     }
     http.end();
   }
@@ -249,7 +256,7 @@ void Radiko :: setEnableSBR(bool sbr) {
 
 bool Radiko :: begin(const char *secret_key) {
   if(strlen(secret_key) != 40 && strlen(secret_key) != 32000)
-    return false;     
+    return false;
 
   if(!user && !pass)
     setAuthorization();
@@ -260,13 +267,8 @@ bool Radiko :: begin(const char *secret_key) {
     if(!decode_buffer)
       return false;
   }
-  uint8_t keyType = strlen(secret_key) == 40 ? 0 : 1;
-  WiFiClientSecure clients;
-  HTTPClient http;
-  String partialkey;
-  String cookie;
-  String radiko_session;
-
+  this->secret_key = secret_key;
+  
   deInit();
   areaFree = false;
 
@@ -274,6 +276,40 @@ bool Radiko :: begin(const char *secret_key) {
     bufferSize = std::max((uint32_t)(6 * 1024), std::min((uint32_t)(256 * 1024), (uint32_t)heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
 
   buffer = new AudioFileSourceHLS(bufferSize);
+
+  if(!authenticate())
+    return false;
+  
+  startTask();
+  restart(false);
+  return true;
+}
+
+void Radiko :: stop() {
+  current_playlist = nullptr;
+  chunks = nullptr;
+
+  if(decoder) {
+    stopDecode = 2;
+    while(stopDecode == 2) {delay(100);}
+    buffer->init();      
+  }
+
+  if(stream) {
+    buffer->setSource(nullptr);
+    delete stream;
+    stream = nullptr;
+  }
+  stopDecode = 0;
+}
+
+bool Radiko :: authenticate(){
+  WiFiClientSecure clients;
+  HTTPClient http;
+  String partialkey;
+  String cookie;
+  String radiko_session;
+  uint8_t keyType = strlen(secret_key) == 40 ? 0 : 1;
 
   clients.setInsecure();
   if (user && pass && http.begin(clients, "https://radiko.jp/v4/api/member/login")) {
@@ -318,7 +354,7 @@ bool Radiko :: begin(const char *secret_key) {
         uint8_t key[length];
         unHex(&secret_key[offset * 2], key, length * 2);
         partialkey = base64::encode(key, length);
-    //          partialkey = base64::encode(&secret_key[offset], length);  // when uint8_t[]
+//      partialkey = base64::encode(&secret_key[offset], length);  // when uint8_t[]
       } 
       
       token = http.header(headerKeys[0]);
@@ -354,7 +390,7 @@ bool Radiko :: begin(const char *secret_key) {
   }
 
   if(!area.length() || !token.length())
-  return false;
+    return false;
 
   if(areaFree && !select_pref && http.begin(clients, "https://radiko.jp/v3/station/region/full.xml")) {
   auto httpCode = http.GET();
@@ -396,29 +432,9 @@ bool Radiko :: begin(const char *secret_key) {
   }
 
   if(!stations.size())
-  return false;
-
-  startTask();
-  restart(false);
+    return false;
+  
   return true;
-}
-
-void Radiko :: stop() {
-  current_playlist = nullptr;
-  chunks = nullptr;
-
-  if(decoder) {
-    stopDecode = 2;
-    while(stopDecode == 2) {delay(100);}
-    buffer->init();      
-  }
-
-  if(stream) {
-    buffer->setSource(nullptr);
-    delete stream;
-    stream = nullptr;
-  }
-  stopDecode = 0;
 }
 
 bool Radiko :: RegisterMetadataCB(AudioStatus::metadataCBFn fn, void *data) {
@@ -454,7 +470,6 @@ void Radiko :: downloadTaskCore() {
     } else {
       current_playlist = nullptr;
       onSerious("select_station->getPlaylists(): false");
-  //        token.clear();  // need reAuth
     }
     select_station = nullptr;
   }

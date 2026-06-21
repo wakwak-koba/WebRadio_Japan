@@ -142,8 +142,9 @@ class Radiko : public WebRadio {
     void * decode_buffer = nullptr;
     uint32_t decode_buffer_size;
     
-    char * user = nullptr;;
-    char * pass = nullptr;;
+    const char * secret_key;
+    char * user = nullptr;
+    char * pass = nullptr;
     float lat = 0.0F;
     float lon = 0.0F;
     bool areaFree = false;
@@ -167,6 +168,7 @@ class Radiko : public WebRadio {
     bool enableSBR = false;
     
   private:
+    bool authenticate();
     void deInit();
     virtual void downloadTaskCore() override;   
     virtual void decodeTaskCore() override;
