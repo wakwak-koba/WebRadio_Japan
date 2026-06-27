@@ -2,8 +2,16 @@
  * https://twitter.com/wakwak_koba/
  */
 
-#include <WiFiClient.h>
-#include <WiFiClientSecure.h>
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
+  #include <NetworkClient.h>
+  #include <NetworkClientSecure.h>
+#else
+  #include <WiFiClient.h>
+  #include <WiFiClientSecure.h>
+  using NetworkClient = WiFiClient;
+  using NetworkClientSecure = WiFiClientSecure;
+#endif
+
 #include <AudioFileSourceHTTPStream.h>
 #include <AudioGeneratorAAC.h>
 #include "WebRadio_ListenRadio.h"
@@ -134,7 +142,7 @@ AudioFileSource * ListenRadio :: station_t :: playlist_t :: chunk_t :: getStream
 
 
 std::vector<ListenRadio :: station_t :: playlist_t :: chunk_t *> * ListenRadio :: station_t :: playlist_t :: getChunks() {
-  WiFiClient client;
+  NetworkClient client;
   HTTPClient http;
   bool success = false;
   
@@ -174,7 +182,7 @@ void ListenRadio :: station_t :: playlist_t :: clearChunks() {
 
 
 std::vector<ListenRadio :: station_t :: playlist_t *> * ListenRadio :: station_t :: getPlaylists() {
-  WiFiClient client;
+  NetworkClient client;
   HTTPClient http;
   bool success = false;
   

@@ -167,15 +167,19 @@ class WebRadio {
     virtual void saveStationCore(uint32_t nvs_handle, WebRadio::Station * station) {}
     virtual WebRadio::Station * restoreStationCore(uint32_t nvs_handle) {return nullptr;}  
 
-    virtual void sendSyslog(const char *text) {
+    template < typename... Args >
+    void sendSyslog(const char *fmt, Args... args) {
       if(syslog_udp_address != nullptr && syslog_udp_port) {
-        static WiFiUDP udp;
-        static uint64_t seq = 0;
         
         udp.beginPacket(syslog_udp_address, syslog_udp_port);
-        udp.printf("SEQ:%llu %s", ++seq, text);
+        udp.printf("SEQ:%llu ", ++seq);
+        udp.printf(fmt, args...);
         udp.endPacket();
       }
+    }
+    
+    virtual void sendSyslog(const char *text) {
+      sendSyslog("%s", text);
     }
     
     void sendLog(const char *text, bool error = false) {
@@ -189,6 +193,29 @@ class WebRadio {
       sendLog(text.c_str(), error);
     }
     
+    template < typename... Args >
+    String toString(const char *fmt, Args... args) {
+      int size_s = std::snprintf(nullptr, 0, fmt, args...);
+      if (size_s <= 0)
+          return String(""); 
+      
+      size_t size = static_cast<size_t>(size_s);
+      char buf[size + 1];
+      std::snprintf(buf, size + 1, fmt, args...);
+      return String(buf);
+    }
+    
+    template < typename... Args >
+    void sendLog(bool error, const char *fmt, Args... args) {
+      auto text = toString(fmt, args...);
+      sendSyslog(text);
+      if(error && onError)
+        onError(text);
+      if(!error && onInfo)
+        onInfo(text);
+    }
+
+  
   public:
     virtual bool begin() { return false; }
     virtual bool play(int idx) {
@@ -327,7 +354,7 @@ class WebRadio {
     std::function<void(const char *message)> onUnrecover = nullptr;
 
   protected:
-	AudioGenerator * decoder = nullptr;
+    AudioGenerator * decoder = nullptr;
     AudioOutput * out = nullptr;
     std::vector<Station *> stations;
     Station * current_station = nullptr;
@@ -358,6 +385,8 @@ class WebRadio {
       ((WebRadio*)radio)->decodeTask();
     }
 
+    WiFiUDP udp;
+    uint64_t seq = 0;
     char * syslog_udp_address = nullptr;
     uint16_t syslog_udp_port = 0;
 };

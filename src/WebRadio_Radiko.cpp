@@ -2,11 +2,19 @@
  * https://twitter.com/wakwak_koba/
  */
 
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
+  #include <NetworkClient.h>
+  #include <NetworkClientSecure.h>
+#else
+  #include <WiFiClient.h>
+  #include <WiFiClientSecure.h>
+  using NetworkClient = WiFiClient;
+  using NetworkClientSecure = WiFiClientSecure;
+#endif
+
 #include <AudioGeneratorAAC.h>
 #include <AudioFileSourceHTTPStream.h>
 #include "WebRadio_Radiko.h"
-#include <WiFiClient.h>
-#include <WiFiClientSecure.h>
 #include <base64.h>
 
 static const char * headerKeys[] = {"x-radiko-authtoken", "x-radiko-keyoffset", "x-radiko-keylength", "Set-Cookie"};
@@ -52,13 +60,19 @@ AudioFileSource * Radiko :: station_t :: playlist_t :: chunk_t :: getStream() {
 }
 
 
+
 std::vector<Radiko :: station_t :: playlist_t :: chunk_t *> * Radiko :: station_t :: playlist_t :: getChunks() {
-  WiFiClient client;
+  clearChunks(chunks.size() - 10);
+  int chunks_size = chunks.size();
+  auto result = getChunks(getUrl());
+  clearChunks(chunks_size);
+  return result;
+}
+
+std::vector<Radiko :: station_t :: playlist_t :: chunk_t *> * Radiko :: station_t :: playlist_t :: getChunks(const String &m3u8) {
+  NetworkClient client;
   HTTPClient http;
   bool success = false;
-
-  int chunks_size = chunks.size();
-  auto m3u8 = getUrl();
   
   if (http.begin(client, m3u8)) {
     http.addHeader("X-Radiko-AuthToken", getRadiko()->token);
@@ -83,7 +97,7 @@ std::vector<Radiko :: station_t :: playlist_t :: chunk_t *> * Radiko :: station_
     }
     http.end();
   }
-  clearChunks(chunks_size);
+  
   if(success)
     return &chunks;
   else
@@ -94,7 +108,7 @@ void Radiko :: station_t :: playlist_t :: clearChunks(int clearSize) {
   if(!chunks.size() || !clearSize)
     return;
 
-  if(clearSize <= 0)
+  if(clearSize < 0 || clearSize > chunks.size())
     clearSize = chunks.size();
 
   for (int i = 0; i < clearSize; i++)
@@ -109,7 +123,7 @@ std::vector<Radiko :: station_t :: playlist_t *> * Radiko :: station_t :: getPla
 }
 
 String Radiko :: station_t :: playlist_t :: getUrl() {
-  WiFiClientSecure clients;
+  NetworkClientSecure clients;
   HTTPClient http;
   String result;
   
@@ -138,7 +152,7 @@ String Radiko :: station_t :: playlist_t :: getUrl() {
 
 String Radiko :: station_t :: getProgram() {
   String title;
-  WiFiClient client;
+  NetworkClient client;
   HTTPClient http;
 
   char url[40 + strlen(area.c_str())];
@@ -149,7 +163,6 @@ String Radiko :: station_t :: getProgram() {
     if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
       auto payload = http.getString();
       
-      getRadiko()->sendLog(http.header(headerKeys_program[0]).c_str());
       if(http.header(headerKeys_program[0]).equalsIgnoreCase("gzip"))
         payload = uncompress((uint8_t *)(payload.c_str()), payload.length());
       
@@ -304,7 +317,7 @@ void Radiko :: stop() {
 }
 
 bool Radiko :: authenticate(){
-  WiFiClientSecure clients;
+  NetworkClientSecure clients;
   HTTPClient http;
   String partialkey;
   String cookie;
