@@ -59,7 +59,7 @@ class Radiko : public WebRadio {
             station_t * getStation() { return station; }
             Radiko * getRadiko() { return getStation()->getRadiko(); }
             AudioGenerator * getDecoder();
-            String getUrl();
+            String getUrl(bool *needAuth);
             
             struct chunk_t {
               friend struct playlist_t;

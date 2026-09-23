@@ -64,7 +64,13 @@ AudioFileSource * Radiko :: station_t :: playlist_t :: chunk_t :: getStream() {
 std::vector<Radiko :: station_t :: playlist_t :: chunk_t *> * Radiko :: station_t :: playlist_t :: getChunks() {
   clearChunks(chunks.size() - 10);
   int chunks_size = chunks.size();
-  auto result = getChunks(getUrl());
+  
+  bool needAuth = false;
+  auto url = getUrl(&needAuth);
+  if(needAuth && getRadiko()->authenticate())
+    url = getUrl(&needAuth);
+  
+  auto result = getChunks(url);
   clearChunks(chunks_size);
   return result;
 }
@@ -122,28 +128,27 @@ std::vector<Radiko :: station_t :: playlist_t *> * Radiko :: station_t :: getPla
   return &playlists;
 }
 
-String Radiko :: station_t :: playlist_t :: getUrl() {
+String Radiko :: station_t :: playlist_t :: getUrl(bool *needAuth) {
   NetworkClientSecure clients;
   HTTPClient http;
   String result;
   
   clients.setInsecure();
   if (http.begin(clients, url)) {
-    for(int retry = 0; retry < 2; retry++ ) {
-      http.addHeader("X-Radiko-AuthToken", getRadiko()->token);
-      auto httpCode = http.GET();
-      if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-        result = http.getString();
-        break;
-      } else if (httpCode == HTTP_CODE_FORBIDDEN && getRadiko()->authenticate()) {
-        // 再認証したうえで再試行する
-        ;
-      } else {
-        char bufs[url.length() + 10];
-        sprintf(bufs, "%s %d", url.c_str(), httpCode);
+    http.addHeader("X-Radiko-AuthToken", getRadiko()->token);
+    auto httpCode = http.GET();
+    if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
+      result = http.getString();
+    else {
+      char bufs[url.length() + 10];
+      sprintf(bufs, "%s %d", url.c_str(), httpCode);
+      
+      if (httpCode == HTTP_CODE_FORBIDDEN) {
+        getRadiko()->sendLog(bufs);
+        if(needAuth)
+          *needAuth = true;
+      } else 
         getRadiko()->sendLog(bufs, true);
-        break;
-      }
     }
     http.end();
   }
@@ -619,7 +624,7 @@ WebRadio :: Station * Radiko :: restoreStationCore(uint32_t nvs_handle) {
     value = new char[length];
     nvs_get_str(nvs_handle, key, value  , &length);
     for(auto itr : stations) {
-      if(((station_t *)itr)->id.equals(value)) {
+      if(((station_t *)itr)->id == value) {
         result = itr;
         break;
       }
@@ -634,7 +639,7 @@ WebRadio :: Station * Radiko :: restoreStationCore(uint32_t nvs_handle) {
     value = new char[length];
     nvs_get_str(nvs_handle, "radiko", value  , &length);
     for(auto itr : stations) {
-      if(((station_t *)itr)->id.equals(value))
+      if(((station_t *)itr)->id == value)
       {
         result = itr;
         break;

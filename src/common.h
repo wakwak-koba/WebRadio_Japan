@@ -105,6 +105,11 @@ static String urlencode(String str)
 }
 
 static String uncompress(uint8_t * source, const uint32_t len) {
+  
+  if(len < 18) {
+    return String("");
+  }
+  
   uint32_t dlen;
   dlen =            source[len - 1];
   dlen = 256*dlen + source[len - 2];
@@ -114,7 +119,7 @@ static String uncompress(uint8_t * source, const uint32_t len) {
   dlen++;
   auto dest = (uint8_t *)malloc(dlen);
   if(dest == nullptr)
-  return String("");
+    return String("");
   
   struct uzlib_uncomp d;
   uzlib_uncompress_init(&d, NULL, 0);
