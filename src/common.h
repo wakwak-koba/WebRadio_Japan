@@ -106,7 +106,7 @@ static String urlencode(String str)
 
 static String uncompress(uint8_t * source, const uint32_t len) {
   
-  if(len < 18) {
+  if(len < 18 || source[0] != 0x1f || source[1] != 0x8b) {
     return String("");
   }
   
